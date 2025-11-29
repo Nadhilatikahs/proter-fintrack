@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Events\ReminderCreated;
 use App\Models\Budget;
 use App\Models\Goal;
 use App\Models\Reminder;
@@ -26,6 +27,10 @@ class ProcessFinancialReminders extends Command
 
         foreach ($settings as $setting) {
             $user = $setting->user;
+
+            if (! $user) {
+                continue;
+            }
 
             // 1) Budget reminder (bulan ini)
             $this->processBudgetReminders($user, $setting, $aiReminderService, $now);
@@ -54,21 +59,20 @@ class ProcessFinancialReminders extends Command
             ->get();
 
         foreach ($budgets as $budget) {
-            $usage = $budget->usage_percentage;   // dari accessor di model Budget
+            $usage = $budget->usage_percentage;
 
-            // siapkan context mentah untuk AI dan untuk disimpan
             $context = [
-                'budget_id'       => $budget->id,
-                'category'        => optional($budget->category)->name,
-                'limit_amount'    => $budget->limit_amount,
-                'spent'           => $budget->spent,
-                'remaining'       => $budget->remaining,
-                'usage_percentage'=> $usage,
-                'month'           => $month,
-                'year'            => $year,
+                'budget_id'        => $budget->id,
+                'category'         => optional($budget->category)->name,
+                'limit_amount'     => $budget->limit_amount,
+                'spent'            => $budget->spent,
+                'remaining'        => $budget->remaining,
+                'usage_percentage' => $usage,
+                'month'            => $month,
+                'year'             => $year,
             ];
 
-            // 1a. Jika sudah lewat 100% → budget_over_limit
+            // 1a. Kalau sudah >= 100% -> over_limit
             if ($usage >= 100) {
                 if ($this->alreadySentRecently($user, 'budget_over_limit', $budget->id)) {
                     continue;
@@ -80,7 +84,7 @@ class ProcessFinancialReminders extends Command
                     context: $context
                 );
 
-                Reminder::create([
+                $reminder = Reminder::create([
                     'user_id'       => $user->id,
                     'type'          => 'budget_over_limit',
                     'related_id'    => $budget->id,
@@ -90,11 +94,13 @@ class ProcessFinancialReminders extends Command
                     'data'          => $context,
                 ]);
 
-                // disini nanti bisa trigger event untuk kirim email
+                // Trigger event => listener akan kirim email
+                event(new ReminderCreated($reminder));
+
                 continue;
             }
 
-            // 1b. Kalau melewati threshold (misal 80%) tapi belum 100
+            // 1b. Budget mendekati batas (>= threshold)
             if ($usage >= $setting->budget_warning_threshold) {
                 if ($this->alreadySentRecently($user, 'budget_warning', $budget->id)) {
                     continue;
@@ -106,7 +112,7 @@ class ProcessFinancialReminders extends Command
                     context: $context
                 );
 
-                Reminder::create([
+                $reminder = Reminder::create([
                     'user_id'       => $user->id,
                     'type'          => 'budget_warning',
                     'related_id'    => $budget->id,
@@ -115,6 +121,8 @@ class ProcessFinancialReminders extends Command
                     'message'       => $message,
                     'data'          => $context,
                 ]);
+
+                event(new ReminderCreated($reminder));
             }
         }
     }
@@ -126,7 +134,7 @@ class ProcessFinancialReminders extends Command
         Carbon $now
     ): void {
         $goals = Goal::where('user_id', $user->id)
-            ->where('current_amount', '<', \DB::raw('target_amount'))
+            ->whereColumn('current_amount', '<', 'target_amount')
             ->whereNotNull('target_date')
             ->get();
 
@@ -134,12 +142,11 @@ class ProcessFinancialReminders extends Command
             $daysLeft = $now->diffInDays($goal->target_date, false);
 
             if ($daysLeft < 0) {
-                // sudah lewat, bisa buat reminder tipe lain kalau perlu
-                continue;
+                continue; // sudah lewat
             }
 
             if ($daysLeft > $setting->goal_days_before_due) {
-                continue;
+                continue; // belum mendekati
             }
 
             if ($this->alreadySentRecently($user, 'goal_due_soon', $goal->id)) {
@@ -161,7 +168,7 @@ class ProcessFinancialReminders extends Command
                 context: $context
             );
 
-            Reminder::create([
+            $reminder = Reminder::create([
                 'user_id'       => $user->id,
                 'type'          => 'goal_due_soon',
                 'related_id'    => $goal->id,
@@ -170,6 +177,8 @@ class ProcessFinancialReminders extends Command
                 'message'       => $message,
                 'data'          => $context,
             ]);
+
+            event(new ReminderCreated($reminder));
         }
     }
 
@@ -178,7 +187,7 @@ class ProcessFinancialReminders extends Command
         return Reminder::where('user_id', $user->id)
             ->where('type', $type)
             ->where('related_id', $relatedId)
-            ->where('created_at', '>=', now()->subDay()) // misal: 1x / hari
+            ->where('created_at', '>=', now()->subDay()) // 1x per 24 jam
             ->exists();
     }
 }
