@@ -42,6 +42,8 @@ class AdminPanelProvider extends PanelProvider
                 Widgets\FilamentInfoWidget::class,
                 AppWidgets\FinanceOverview::class,   // <-- widget keuanganmu
                 AppWidgets\MonthlyFinanceChart::class,
+                AppWidgets\BudgetOverview::class,
+                AppWidgets\GoalOverview::class,
             ])
             // discover supaya widget lain di folder ini juga dikenal Filament
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\\Filament\\Widgets')
