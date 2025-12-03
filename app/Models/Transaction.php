@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Str;
 
 class Transaction extends Model
 {
@@ -11,10 +12,17 @@ class Transaction extends Model
 
     protected $fillable = [
         'user_id',
+        'code',
         'date',
-        'description',
+        'title',
+        'type',        // income / expense
         'category_id',
         'amount',
+        'description',
+    ];
+
+    protected $casts = [
+        'date' => 'date',
     ];
 
     public function user()
@@ -25,5 +33,17 @@ class Transaction extends Model
     public function category()
     {
         return $this->belongsTo(Category::class);
+    }
+
+    /**
+     * Generate kode transaksi otomatis.
+     */
+    public static function generateCode(): string
+    {
+        do {
+            $code = 'TRX-' . now()->format('Ymd-His') . '-' . Str::upper(Str::random(4));
+        } while (self::where('code', $code)->exists());
+
+        return $code;
     }
 }

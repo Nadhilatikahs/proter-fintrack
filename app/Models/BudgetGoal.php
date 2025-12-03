@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Category extends Model
+class BudgetGoal extends Model
 {
     use HasFactory;
 
@@ -13,16 +13,18 @@ class Category extends Model
         'user_id',
         'name',
         'description',
-        // 'type',  // tidak dipakai lagi di form
+        'type',          // budget | goal
+        'period_type',
+        'target_amount',
+        'target_date',
+    ];
+
+    protected $casts = [
+        'target_date' => 'date',
     ];
 
     public function user()
     {
         return $this->belongsTo(User::class);
-    }
-
-    public function transactions()
-    {
-        return $this->hasMany(Transaction::class);
     }
 }

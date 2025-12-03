@@ -3,10 +3,10 @@
 namespace App\Console\Commands;
 
 use App\Events\ReminderCreated;
-use App\Models\Budget;
-use App\Models\Goal;
+use App\Models\BudgetGoal;
 use App\Models\Reminder;
 use App\Models\ReminderSetting;
+use App\Models\Transaction;
 use App\Models\User;
 use App\Services\AiReminderService;
 use Carbon\Carbon;
@@ -16,13 +16,13 @@ class ProcessFinancialReminders extends Command
 {
     protected $signature = 'fintrack:process-reminders';
 
-    protected $description = 'Cek budget/goal dan buat reminder AI untuk tiap user';
+    protected $description = 'Cek budget & goals dan buat reminder AI untuk tiap user';
 
     public function handle(AiReminderService $aiReminderService): int
     {
         $now = Carbon::now();
 
-        // Ambil semua user yang punya setting
+        // Ambil setting reminder tiap user (kalau tidak ada, skip user tsb)
         $settings = ReminderSetting::with('user')->get();
 
         foreach ($settings as $setting) {
@@ -32,10 +32,10 @@ class ProcessFinancialReminders extends Command
                 continue;
             }
 
-            // 1) Budget reminder (bulan ini)
+            // 1) Proses budget (pembatas pengeluaran)
             $this->processBudgetReminders($user, $setting, $aiReminderService, $now);
 
-            // 2) Goal reminder (mendekati jatuh tempo)
+            // 2) Proses goals (target jangka panjang, misal 10jt / 1 tahun)
             $this->processGoalReminders($user, $setting, $aiReminderService, $now);
         }
 
@@ -50,29 +50,47 @@ class ProcessFinancialReminders extends Command
         AiReminderService $ai,
         Carbon $now
     ): void {
-        $month = $now->month;
-        $year  = $now->year;
-
-        $budgets = Budget::where('user_id', $user->id)
-            ->where('month', $month)
-            ->where('year', $year)
+        // Ambil semua BudgetGoal type 'budget' untuk user ini
+        $budgets = BudgetGoal::where('user_id', $user->id)
+            ->where('type', 'budget')
+            ->whereNotNull('period_type')
             ->get();
 
         foreach ($budgets as $budget) {
-            $usage = $budget->usage_percentage;
+            // Tentukan rentang waktu berdasarkan period_type
+            [$start, $end, $periodDays] = $this->getPeriodRange($budget->period_type, $now);
+
+            // Total pengeluaran (expense) dalam periode ini
+            $spent = Transaction::where('user_id', $user->id)
+                ->where('type', 'expense')
+                ->whereBetween('date', [$start->toDateString(), $end->toDateString()])
+                ->sum('amount');
+
+            if ($budget->target_amount <= 0) {
+                continue;
+            }
+
+            $usage        = round(($spent / $budget->target_amount) * 100, 2);
+            $daysPassed   = $start->diffInDays($now) + 1;
+            $daysPassed   = max(1, $daysPassed);
+            $timeProgress = round(($daysPassed / $periodDays) * 100, 2);
 
             $context = [
-                'budget_id'        => $budget->id,
-                'category'         => optional($budget->category)->name,
-                'limit_amount'     => $budget->limit_amount,
-                'spent'            => $budget->spent,
-                'remaining'        => $budget->remaining,
+                'budget_goal_id' => $budget->id,
+                'name'           => $budget->name,
+                'description'    => $budget->description,
+                'period_type'    => $budget->period_type,
+                'target_amount'  => $budget->target_amount,
+                'spent'          => $spent,
                 'usage_percentage' => $usage,
-                'month'            => $month,
-                'year'             => $year,
+                'time_progress_percentage' => $timeProgress,
+                'period_start'   => $start->toDateString(),
+                'period_end'     => $end->toDateString(),
+                'days_passed'    => $daysPassed,
+                'period_days'    => $periodDays,
             ];
 
-            // 1a. Kalau sudah >= 100% -> over_limit
+            // 1a. Jika sudah > 100% → over limit
             if ($usage >= 100) {
                 if ($this->alreadySentRecently($user, 'budget_over_limit', $budget->id)) {
                     continue;
@@ -88,19 +106,17 @@ class ProcessFinancialReminders extends Command
                     'user_id'       => $user->id,
                     'type'          => 'budget_over_limit',
                     'related_id'    => $budget->id,
-                    'related_model' => Budget::class,
-                    'title'         => 'Budget bulan ini sudah terlampaui',
+                    'related_model' => BudgetGoal::class,
+                    'title'         => 'Budget kamu sudah kelewat batas 💸',
                     'message'       => $message,
                     'data'          => $context,
                 ]);
 
-                // Trigger event => listener akan kirim email
                 event(new ReminderCreated($reminder));
-
                 continue;
             }
 
-            // 1b. Budget mendekati batas (>= threshold)
+            // 1b. Kalau melewati threshold tapi belum limit
             if ($usage >= $setting->budget_warning_threshold) {
                 if ($this->alreadySentRecently($user, 'budget_warning', $budget->id)) {
                     continue;
@@ -116,8 +132,8 @@ class ProcessFinancialReminders extends Command
                     'user_id'       => $user->id,
                     'type'          => 'budget_warning',
                     'related_id'    => $budget->id,
-                    'related_model' => Budget::class,
-                    'title'         => 'Budget mendekati batas',
+                    'related_model' => BudgetGoal::class,
+                    'title'         => 'Budget kamu udah kepake banyak nih 🧐',
                     'message'       => $message,
                     'data'          => $context,
                 ]);
@@ -127,14 +143,17 @@ class ProcessFinancialReminders extends Command
         }
     }
 
+    /**
+     * Hitung reminder untuk goals.
+     */
     protected function processGoalReminders(
         User $user,
         ReminderSetting $setting,
         AiReminderService $ai,
         Carbon $now
     ): void {
-        $goals = Goal::where('user_id', $user->id)
-            ->whereColumn('current_amount', '<', 'target_amount')
+        $goals = BudgetGoal::where('user_id', $user->id)
+            ->where('type', 'goal')
             ->whereNotNull('target_date')
             ->get();
 
@@ -142,25 +161,27 @@ class ProcessFinancialReminders extends Command
             $daysLeft = $now->diffInDays($goal->target_date, false);
 
             if ($daysLeft < 0) {
-                continue; // sudah lewat
+                continue; // jika target sudah lewat
             }
 
             if ($daysLeft > $setting->goal_days_before_due) {
-                continue; // belum mendekati
+                continue; // belum masuk jangka reminder
             }
 
             if ($this->alreadySentRecently($user, 'goal_due_soon', $goal->id)) {
                 continue;
             }
 
+            // NOTE: untuk progress nominal, di versi sederhana ini
+            // kita belum menghubungkan langsung dengan saving transaction,
+            // jadi fokusnya ke countdown waktu.
             $context = [
-                'goal_id'          => $goal->id,
-                'name'             => $goal->name,
-                'target_amount'    => $goal->target_amount,
-                'current_amount'   => $goal->current_amount,
-                'progress_percent' => $goal->progress_percentage,
-                'target_date'      => $goal->target_date->toDateString(),
-                'days_left'        => $daysLeft,
+                'budget_goal_id' => $goal->id,
+                'name'           => $goal->name,
+                'description'    => $goal->description,
+                'target_amount'  => $goal->target_amount,
+                'target_date'    => $goal->target_date->toDateString(),
+                'days_left'      => $daysLeft,
             ];
 
             $message = $ai->generateGoalReminder(
@@ -172,14 +193,54 @@ class ProcessFinancialReminders extends Command
                 'user_id'       => $user->id,
                 'type'          => 'goal_due_soon',
                 'related_id'    => $goal->id,
-                'related_model' => Goal::class,
-                'title'         => 'Goal mendekati target date',
+                'related_model' => BudgetGoal::class,
+                'title'         => 'Goal kamu makin deket nih ✨',
                 'message'       => $message,
                 'data'          => $context,
             ]);
 
             event(new ReminderCreated($reminder));
         }
+    }
+
+    /**
+     * Tentukan rentang periode berdasarkan period_type.
+     *
+     * @return array [Carbon $start, Carbon $end, int $periodDays]
+     */
+    protected function getPeriodRange(string $periodType, Carbon $now): array
+    {
+        $start = $now->copy();
+        $end   = $now->copy();
+
+        return match ($periodType) {
+            'daily'    => [
+                $start->startOfDay(),
+                $end->endOfDay(),
+                1,
+            ],
+            'weekly'   => [
+                $start->startOfWeek(),   // Senin
+                $end->endOfWeek(),       // Minggu
+                7,
+            ],
+            'biweekly' => [
+                $start->copy()->subDays(13)->startOfDay(), // 14 hari terakhir
+                $end->endOfDay(),
+                14,
+            ],
+            'yearly'   => [
+                $start->startOfYear(),
+                $end->endOfYear(),
+                $start->daysInYear,
+            ],
+            default    => [
+                // default: monthly
+                $start->startOfMonth(),
+                $end->endOfMonth(),
+                $start->daysInMonth,
+            ],
+        };
     }
 
     protected function alreadySentRecently(User $user, string $type, int $relatedId): bool

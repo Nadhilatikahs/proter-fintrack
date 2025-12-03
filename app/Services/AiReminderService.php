@@ -7,15 +7,6 @@ use Illuminate\Support\Facades\Http;
 
 class AiReminderService
 {
-    /**
-     * Generate pesan reminder untuk budget (warning / over-limit).
-     *
-     * @param  User   $user    User pemilik budget
-     * @param  string $type    'warning' atau 'over_limit'
-     * @param  array  $context Data situasi budget (limit, spent, sisa, dll.)
-     *
-     * @return string Pesan reminder yang sudah di-generate AI / fallback
-     */
     public function generateBudgetReminder(User $user, string $type, array $context): string
     {
         $prompt = $this->buildBudgetPrompt($user, $type, $context);
@@ -23,14 +14,6 @@ class AiReminderService
         return $this->callAiApi($prompt);
     }
 
-    /**
-     * Generate pesan reminder untuk financial goal yang mendekati due date.
-     *
-     * @param  User  $user
-     * @param  array $context
-     *
-     * @return string
-     */
     public function generateGoalReminder(User $user, array $context): string
     {
         $prompt = $this->buildGoalPrompt($user, $context);
@@ -38,90 +21,100 @@ class AiReminderService
         return $this->callAiApi($prompt);
     }
 
-    /**
-     * Susun prompt untuk budget reminder.
-     */
     protected function buildBudgetPrompt(User $user, string $type, array $c): string
     {
-        $jenis = $type === 'over_limit' ? 'MELEBIHI' : 'MENDekati';
-        $category = $c['category'] ?? 'semua kategori';
+        $jenis      = $type === 'over_limit' ? 'MELEBIHI BATAS' : 'MENDekati batas';
+        $name       = $c['name'] ?? 'Budget';
+        $periodType = $c['period_type'] ?? 'monthly';
 
-        // Biar angka lebih rapi di prompt
-        $limit      = number_format((float) ($c['limit_amount'] ?? 0), 0, ',', '.');
-        $spent      = number_format((float) ($c['spent'] ?? 0), 0, ',', '.');
-        $remaining  = number_format((float) ($c['remaining'] ?? 0), 0, ',', '.');
-        $percentage = $c['usage_percentage'] ?? 0;
+        $target   = number_format((float) ($c['target_amount'] ?? 0), 0, ',', '.');
+        $spent    = number_format((float) ($c['spent'] ?? 0), 0, ',', '.');
+        $usage    = $c['usage_percentage'] ?? 0;
+        $timeProg = $c['time_progress_percentage'] ?? 0;
+        $start    = $c['period_start'] ?? '-';
+        $end      = $c['period_end'] ?? '-';
+        $daysPass = $c['days_passed'] ?? 0;
+        $period   = $c['period_days'] ?? 0;
+
+        $periodLabel = match ($periodType) {
+            'daily'    => 'per hari',
+            'weekly'   => 'per minggu',
+            'biweekly' => 'per 2 minggu',
+            'yearly'   => 'per tahun',
+            default    => 'per bulan',
+        };
 
         return <<<PROMPT
-Kamu adalah asisten keuangan pribadi yang ramah dan ringkas.
+Aku adalah asisten keuangan pribadi yang GAYA BAHASANYA:
+- santai, gen Z, tapi tetap sopan dan tidak kasar,
+- boleh pakai sedikit kata gaul (misalnya "anjay", "santuy", "gaskeun") dan emoji,
+- TIDAK boleh menggunakan kata-kata menghina, SARA, atau vulgar.
 
 Nama pengguna: {$user->name}
 
-Situasi:
-- Jenis reminder: BUDGET {$jenis}
-- Kategori: {$category}
-- Batas budget: Rp {$limit}
-- Sudah terpakai: Rp {$spent} ({$percentage}% dari budget)
-- Sisa budget: Rp {$remaining}
-- Periode: {$c['month']}/{$c['year']}
+Situasi budget:
+- Nama budget: {$name}
+- Jenis budget: {$periodLabel}
+- Jenis reminder: {$jenis}
+- Periode budget: {$start} s/d {$end} (total sekitar {$period} hari)
+- Batas budget (target_amount): Rp {$target}
+- Sudah terpakai (spent): Rp {$spent}
+- Persentase pemakaian (usage_percentage): {$usage}%
+- Progress waktu periode (time_progress_percentage): {$timeProg}% (misalnya baru {$daysPass} hari berjalan)
 
-Tulis SATU paragraf pendek dalam bahasa Indonesia yang:
-- berbahasa sopan tapi santai,
-- menjelaskan kondisi budget saat ini,
-- memberi 1–2 saran praktis (misalnya: review pengeluaran, kurangi kategori tertentu),
-- maksimal 3 kalimat.
+Tugasmu:
+- Tulis 1 PARAGRAF SINGKAT dalam bahasa Indonesia yang:
+  - gaya santai dan friendly, cocok buat anak muda,
+  - menyebutkan kondisi pemakaian budget (misalnya "budget kamu udah kepake 50%"),
+  - kalau usage lebih besar dari progress waktu (pemakaian lebih ngebut dari waktunya), kamu boleh kasih peringatan lucu,
+  - beri 1–2 saran praktis (misalnya "coba tahan dulu jajan kopi" atau "review pengeluaran yang nggak terlalu penting"),
+  - maksimal 3 kalimat,
+  - boleh pakai 2–4 emoji yang relevan.
 
+Jangan tulis intro seperti "Halo, berikut ini adalah..." langsung ke pesan. Jangan menyebut bahwa kamu adalah AI.
 PROMPT;
     }
 
-    /**
-     * Susun prompt untuk goal reminder.
-     */
     protected function buildGoalPrompt(User $user, array $c): string
     {
-        $target      = number_format((float) ($c['target_amount'] ?? 0), 0, ',', '.');
-        $current     = number_format((float) ($c['current_amount'] ?? 0), 0, ',', '.');
-        $progress    = $c['progress_percent'] ?? 0;
-        $targetDate  = $c['target_date'] ?? '-';
-        $daysLeft    = $c['days_left'] ?? 0;
+        $target     = number_format((float) ($c['target_amount'] ?? 0), 0, ',', '.');
+        $name       = $c['name'] ?? 'Goal';
+        $targetDate = $c['target_date'] ?? '-';
+        $daysLeft   = $c['days_left'] ?? 0;
 
         return <<<PROMPT
-Kamu adalah asisten keuangan pribadi yang membantu pengguna fokus pada tujuan keuangan.
+Aku adalah asisten keuangan pribadi dengan gaya santai dan suportif.
 
-Nama pengguna: {$user->name}
+GAYA BAHASA:
+- santai, sedikit gen Z, tapi tetap sopan,
+- boleh pakai emoji (2–4 emoji maksimal),
+- jangan pakai kata kasar atau menghina.
 
-Situasi goal:
-- Nama goal: {$c['name']}
+Info goal:
+- Nama goal: {$name}
 - Target dana: Rp {$target}
-- Terkumpul: Rp {$current} ({$progress}% tercapai)
-- Target tanggal: {$targetDate}
+- Target date: {$targetDate}
 - Sisa hari menuju target: {$daysLeft} hari
 
-Tulis SATU paragraf pendek dalam bahasa Indonesia yang:
-- memberi semangat,
-- mengingatkan bahwa target semakin dekat,
-- menyarankan langkah kecil yang bisa dilakukan (misalnya menambah sedikit tabungan mingguan),
-- maksimal 3 kalimat.
+Tugas:
+- Tulis 1 paragraf pendek dalam bahasa Indonesia yang:
+  - memberi semangat bahwa goal ini makin deket,
+  - mengingatkan bahwa waktu makin sedikit (kalau sisa harinya sedikit),
+  - menyarankan langkah kecil yang bisa dilakukan (misalnya nabung rutin tiap minggu),
+  - maksimal 3 kalimat,
+  - cocok untuk user bernama {$user->name} (boleh sebut namanya sekali).
 
+Jangan tulis "Halo saya AI", langsung ke isi pesan.
 PROMPT;
     }
 
-    /**
-     * Panggil API AI (contoh: OpenAI). Kalau tidak ada API key, pakai fallback.
-     *
-     * Di sini kamu boleh ganti ke provider apapun.
-     */
     protected function callAiApi(string $prompt): string
     {
-        // Ambil API key dari config/services.php -> 'openai'
         $apiKey = config('services.openai.key');
 
-        // Fallback sederhana kalau belum set API key
         if (! $apiKey) {
-            // Ambil sedikit isi prompt & jadikan pesan standar
-            return '📌 Reminder keuangan otomatis (mode sederhana): '
-                . 'sistem mendeteksi kondisi budget/goal yang perlu kamu perhatikan. '
-                . 'Silakan cek detail di halaman laporan Fintrack.';
+            // fallback kalau belum setting API key
+            return '📌 Reminder keuangan: tunggu sebentar yach, budget & goal kamu lagi dicek sistem nich. Coba intip dashboard Fintrack dulu ya biar nggak kebablasan 😉';
         }
 
         try {
@@ -131,7 +124,7 @@ PROMPT;
                     'messages' => [
                         [
                             'role'    => 'system',
-                            'content' => 'Kamu adalah asisten keuangan pribadi yang ramah dan ringkas.',
+                            'content' => 'Hi, aku asisten keuangan pribadi kamu, gaya santai, sedikit gen Z, tapi tetap sopan. Tidak boleh kasar atau menghina.',
                         ],
                         [
                             'role'    => 'user',
@@ -142,18 +135,14 @@ PROMPT;
                 ]);
 
             if (! $response->successful()) {
-                // Bisa ditambah logging di sini
-                return '📌 Reminder keuangan: sistem gagal menghubungi layanan AI, '
-                    . 'namun budget/goal kamu perlu dicek. Buka aplikasi Fintrack untuk detailnya.';
+                return '📌 Reminder keuangan: sistem gagal menghubungi layanan AI, tapi budget/goal kamu lagi rawan nih. Coba cek Fintrack dulu ya 🙏';
             }
 
             $text = $response->json('choices.0.message.content');
 
-            return $text ? trim($text) : '📌 Reminder keuangan otomatis.';
+            return $text ? trim($text) : '📌 Reminder keuangan otomatis dari Fintrack.';
         } catch (\Throwable $e) {
-            // Jangan sampai bikin command gagal total, cukup fallback
-            return '📌 Reminder keuangan: ada kendala teknis saat membuat pesan AI. '
-                . 'Silakan cek ringkasan budget dan goal di aplikasi Fintrack.';
+            return '📌 Reminder keuangan: ada kendala teknis ringan. Untuk sementara, cek lagi pengeluaran dan budget kamu di Fintrack ya 🙌';
         }
     }
 }

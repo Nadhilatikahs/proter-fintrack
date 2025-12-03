@@ -32,5 +32,6 @@
                 {{ $slot }}
             </main>
         </div>
+        <x-fintrack-notification-permission />
     </body>
 </html>

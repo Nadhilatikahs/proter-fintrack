@@ -33,6 +33,7 @@ class Reminder extends Model
 
     public function related()
     {
+        // kalau kamu mau morphTo ke Budget/Goal, ini opsional
         return $this->morphTo(null, 'related_model', 'related_id');
     }
 }
