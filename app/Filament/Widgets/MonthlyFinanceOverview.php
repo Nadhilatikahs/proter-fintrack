@@ -32,9 +32,9 @@ class MonthlyFinanceOverview extends BaseWidget
 
         $balance = $income - $expense;
 
-        $incomeLabel  = 'Rp ' . number_format($income, 0, ',', '.');
-        $expenseLabel = 'Rp ' . number_format($expense, 0, ',', '.');
-        $balanceLabel = 'Rp ' . number_format($balance, 0, ',', '.');
+        $incomeLabel  = 'Rp ' . number_format($income, 0, '.', ',');
+        $expenseLabel = 'Rp ' . number_format($expense, 0, '.', ',');
+        $balanceLabel = 'Rp ' . number_format($balance, 0, '.', ',');
 
         return [
             Card::make('Pemasukan bulan ini', $incomeLabel)

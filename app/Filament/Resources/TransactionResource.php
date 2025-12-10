@@ -5,6 +5,7 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\TransactionResource\Pages;
 use App\Models\Category;
 use App\Models\Transaction;
+use Carbon\Carbon;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -12,17 +13,14 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
-use Carbon\Carbon;
 
 class TransactionResource extends Resource
 {
     protected static ?string $model = Transaction::class;
-
-    protected static ?string $navigationIcon = 'heroicon-o-banknotes';
-
     protected static ?string $navigationLabel = 'Transactions';
-
-    protected static ?string $navigationGroup = 'Master Data';
+    protected static ?string $navigationGroup = 'MENU';
+    protected static ?string $navigationIcon = 'heroicon-o-arrow-path';
+    protected static ?int $navigationSort = 30;
 
     public static function form(Form $form): Form
     {
@@ -75,67 +73,91 @@ class TransactionResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('code')
-                    ->label('Kode')
-                    ->sortable()
-                    ->copyable(),
-
                 Tables\Columns\TextColumn::make('date')
-                    ->label('Tanggal')
-                    ->date('d M Y')
+                    ->label('Date')
+                    ->date('d F Y')
                     ->sortable(),
 
                 Tables\Columns\TextColumn::make('title')
-                    ->label('Nama transaksi')
+                    ->label('Name')
                     ->searchable()
                     ->wrap(),
 
-                Tables\Columns\TextColumn::make('type')
-                    ->label('Tipe')
-                    ->badge()
-                    ->formatStateUsing(fn (string $state) => $state === 'income' ? 'Income' : 'Expense')
-                    ->colors([
-                        'success' => 'income',
-                        'danger'  => 'expense',
-                    ]),
-
+                // Category pill biru
                 Tables\Columns\TextColumn::make('category.name')
-                    ->label('Kategori')
-                    ->sortable(),
+                    ->label('Category')
+                    ->html()
+                    ->getStateUsing(function (Transaction $record) {
+                        $name = $record->category->name ?? '—';
+                        return "<span class=\"ft-pill ft-pill-category\">{$name}</span>";
+                    }),
 
+                // Amount
                 Tables\Columns\TextColumn::make('amount')
-                    ->label('Jumlah')
+                    ->label('Amount')
                     ->money('idr', true)
                     ->sortable(),
 
-                Tables\Columns\TextColumn::make('description')
-                    ->label('Deskripsi')
-                    ->limit(50)
-                    ->wrap(),
+                // Income / Expense pill
+                Tables\Columns\TextColumn::make('type')
+                    ->label('Type')
+                    ->html()
+                    ->getStateUsing(function (Transaction $record) {
+                        $label = $record->type === 'income' ? 'Income' : 'Expense';
+                        $class = $record->type === 'income'
+                            ? 'ft-pill ft-pill-income'
+                            : 'ft-pill ft-pill-expense';
+
+                        return "<span class=\"{$class}\">{$label}</span>";
+                    }),
             ])
             ->filters([
-                // per hari (hari ini)
-                Tables\Filters\Filter::make('today')
-                    ->label('Today')
+                // ALL → tidak mengubah query, hanya supaya chip "All" ada
+                Tables\Filters\Filter::make('all')
+                    ->label('All')
+                    ->query(fn (Builder $query) => $query),
+
+                // DAY → hari ini
+                Tables\Filters\Filter::make('day')
+                    ->label('Day')
                     ->query(fn (Builder $query) =>
                         $query->whereDate('date', Carbon::today())
                     ),
 
-                // per bulan (bulan ini)
-                Tables\Filters\Filter::make('this_month')
+                // MONTH → bulan ini
+                Tables\Filters\Filter::make('month')
                     ->label('Month')
                     ->query(fn (Builder $query) =>
                         $query->whereYear('date', now()->year)
                               ->whereMonth('date', now()->month)
                     ),
 
-                // per tahun (tahun ini)
-                Tables\Filters\Filter::make('this_year')
-                    ->label('Year')
-                    ->query(fn (Builder $query) =>
-                        $query->whereYear('date', now()->year)
-                    ),
-                // "Semua" = tidak pilih filter apa pun (default)
+                // CATEGORY → dropdown kategori
+                Tables\Filters\SelectFilter::make('category_id')
+                    ->label('Category')
+                    ->relationship('category', 'name'),
+            ])
+            ->actions([
+                Tables\Actions\EditAction::make()
+                    ->label('Edit')
+                    ->button()
+                    ->extraAttributes(['class' => 'fin-btn-dark']),
+
+                Tables\Actions\DeleteAction::make()
+                    ->label('Delete')
+                    ->button()
+                    ->extraAttributes(['class' => 'fin-btn-red'])
+                    ->requiresConfirmation()
+                    ->modalHeading('Are you sure you want to delete this transaction?')
+                    ->modalDescription('This action cannot be undone.'),
+            ])
+            ->bulkActions([
+                Tables\Actions\BulkActionGroup::make([
+                    Tables\Actions\DeleteBulkAction::make()
+                        ->requiresConfirmation()
+                        ->modalHeading('Delete selected transactions?')
+                        ->modalDescription('This action cannot be undone.'),
+                ]),
             ])
             ->defaultSort('date', 'desc')
             ->paginated([10, 25, 50, 100, 'all']);

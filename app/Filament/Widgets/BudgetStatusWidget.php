@@ -38,20 +38,28 @@ class BudgetStatusWidget extends BaseWidget
                 Tables\Columns\TextColumn::make('spent_label')
                     ->label('Sudah terpakai')
                     ->getStateUsing(fn (BudgetGoal $record) =>
-                        'Rp ' . number_format($this->calculateSpent($record), 0, ',', '.')
+                        'Rp ' . number_format($this->calculateSpent($record), 0, '.', ',')
                     ),
 
-                Tables\Columns\ProgressColumn::make('usage_percentage')
+                // ⬇️ Ganti ProgressColumn -> TextColumn
+                Tables\Columns\TextColumn::make('usage_percentage')
                     ->label('Pemakaian')
                     ->getStateUsing(fn (BudgetGoal $record) =>
-                        $this->calculateUsage($record)
+                        $this->calculateUsage($record) . ' %'
                     )
-                    ->suffix('%')
-                    ->colors([
-                        'success' => fn ($value) => $value < 50,
-                        'warning' => fn ($value) => $value >= 50 && $value < 90,
-                        'danger'  => fn ($value) => $value >= 90,
-                    ]),
+                    ->color(function (BudgetGoal $record) {
+                        $value = $this->calculateUsage($record);
+
+                        if ($value < 50) {
+                            return 'success';
+                        }
+
+                        if ($value < 90) {
+                            return 'warning';
+                        }
+
+                        return 'danger';
+                    }),
             ])
             ->defaultSort('name')
             ->paginated(false); // tampilkan semua budget aktif

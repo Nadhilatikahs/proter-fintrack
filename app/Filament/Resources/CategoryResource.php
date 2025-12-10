@@ -15,12 +15,10 @@ use Illuminate\Support\Facades\Auth;
 class CategoryResource extends Resource
 {
     protected static ?string $model = Category::class;
-
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-group';
-
     protected static ?string $navigationLabel = 'Categories';
-
-    protected static ?string $navigationGroup = 'Master Data';
+    protected static ?string $navigationGroup = 'MENU';
+    protected static ?string $navigationIcon = 'heroicon-o-rectangle-group';
+    protected static ?int $navigationSort = 20;
 
     public static function form(Form $form): Form
     {
@@ -55,6 +53,28 @@ class CategoryResource extends Resource
                 Tables\Columns\TextColumn::make('transactions_count')
                     ->counts('transactions')
                     ->label('Jumlah transaksi'),
+            ])
+            ->actions([
+                Tables\Actions\EditAction::make()
+                    ->label('Edit')
+                    ->button()
+                    ->extraAttributes(['class' => 'fin-btn-dark']),
+
+                Tables\Actions\DeleteAction::make()
+                    ->label('Delete')
+                    ->button()
+                    ->extraAttributes(['class' => 'fin-btn-red'])
+                    ->requiresConfirmation()
+                    ->modalHeading('Delete this category?')
+                    ->modalDescription('This action cannot be undone.'),
+            ])
+            ->bulkActions([
+                Tables\Actions\BulkActionGroup::make([
+                    Tables\Actions\DeleteBulkAction::make()
+                        ->requiresConfirmation()
+                        ->modalHeading('Delete selected categories?')
+                        ->modalDescription('This action cannot be undone.'),
+                ]),
             ])
             ->defaultSort('name', 'asc');
     }

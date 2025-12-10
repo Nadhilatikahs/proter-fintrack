@@ -8,15 +8,15 @@
 @endisset
 
 @isset($data['limit_amount'])
-**Budget:** Rp {{ number_format($data['limit_amount'], 0, ',', '.') }}
+**Budget:** Rp {{ number_format($data['limit_amount'], 0, '.', ',') }}
 @endisset
 
 @isset($data['spent'])
-**Terpakai:** Rp {{ number_format($data['spent'], 0, ',', '.') }}
+**Terpakai:** Rp {{ number_format($data['spent'], 0, '.', ',') }}
 @endisset
 
 @isset($data['remaining'])
-**Sisa:** Rp {{ number_format($data['remaining'], 0, ',', '.') }}
+**Sisa:** Rp {{ number_format($data['remaining'], 0, '.', ',') }}
 @endisset
 
 @isset($data['progress_percent'])

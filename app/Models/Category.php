@@ -13,7 +13,7 @@ class Category extends Model
         'user_id',
         'name',
         'description',
-        // 'type',  // tidak dipakai lagi di form
+        // 'type',  // salah ini harusnya di transaksi hmm
     ];
 
     public function user()

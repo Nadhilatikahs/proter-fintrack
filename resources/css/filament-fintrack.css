@@ -1,0 +1,773 @@
+/* resources/css/filament-fintrack.css
+ *
+ * FintracR Filament Theme
+ * Palette: #7BAD3E, #1F2937, #CDF59C, #EFF6D2, #C92020
+ * Font   : Radio Canada Big
+ */
+
+/* =========================
+   BASE IMPORT
+   ========================= */
+@import '/vendor/filament/filament/resources/css/theme.css';
+
+/* Font */
+@import url('https://fonts.googleapis.com/css2?family=Radio+Canada+Big:wght@400;500;600;700&display=swap');
+
+/* Color tokens */
+:root {
+    --fintrack-green: #7BAD3E;
+    --fintrack-navy:  #1F2937;
+    --fintrack-lime:  #CDF59C;
+    --fintrack-cream: #EFF6D2;
+    --fintrack-red:   #C92020;
+
+    /* alias yang dipakai kelas .ft-* */
+    --ft-green: var(--fintrack-green);
+    --ft-navy:  var(--fintrack-navy);
+    --ft-lime:  var(--fintrack-lime);
+    --ft-cream: var(--fintrack-cream);
+    --ft-red:   var(--fintrack-red);
+}
+
+body {
+    font-family: 'Radio Canada Big', system-ui, -apple-system, BlinkMacSystemFont,
+        'Segoe UI', sans-serif;
+}
+
+/* =========================
+   LAYOUT & BACKGROUND
+   ========================= */
+
+.fi-layout,
+.fi-main,
+.fi-body {
+    background-color: var(--ft-cream);
+}
+
+/* Card / panel / widget default */
+.fi-section,
+.fi-panel,
+.fi-widget,
+.fi-card {
+    background-color: var(--ft-lime);
+    border-radius: 1.25rem;
+    border-width: 0;
+    color: var(--ft-navy);
+}
+
+/* Heading page utama (Dashboard, Profile, dll) */
+.fi-header-heading {
+    font-size: 2.55rem;
+    color: var(--ft-navy) !important;
+}
+
+/* Judul section / label form */
+.fi-section-header-heading
+.fi-fo-field-label,
+.fi-input-label,
+.fi-form-field-label,
+.fi-ta-text {
+    color: var(--ft-navy) !important;
+}
+
+/* Input / select / textarea di background terang => teks gelap */
+.fi-input,
+.fi-select,
+.fi-textarea,
+.fi-checkbox-label,
+.fi-radio-label {
+    color: var(--ft-navy) !important;
+}
+
+/* =========================
+   SIDEBAR
+   ========================= */
+
+.fi-sidebar {
+    background-color: var(--ft-navy);
+    color: #F9FAFB;
+}
+
+.fi-sidebar-header {
+    padding-top: 1.5rem;
+    padding-bottom: 1.5rem;
+}
+
+/* group label: MENU, PROFILE */
+.fi-sidebar-group-label {
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-size: 0.75rem;
+    color: rgba(249, 250, 251, 0.7);
+}
+
+.fi-sidebar-nav-item > a {
+    border-radius: 9999px;
+    padding-top: 0.6rem;
+    padding-bottom: 0.6rem;
+    transition:
+        background-color 150ms ease,
+        box-shadow 150ms ease,
+        transform 150ms ease;
+}
+
+/* hover menu */
+.fi-sidebar-nav-item > a:hover {
+    background-color: rgba(148, 163, 184, 0.2);
+}
+
+/* active menu -> gradient */
+.fi-sidebar-nav-item-active > a {
+    background-image: linear-gradient(
+        90deg,
+        #1F2937 32%,
+        #2E4A70 48%,
+        rgba(140, 158, 184, 0.53) 85%
+    );
+    color: #F9FAFB;
+    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.45);
+}
+
+.fi-sidebar-nav-item-icon {
+    font-size: 1.1rem;
+}
+
+.fi-sidebar-footer {
+    margin-top: auto;
+    padding-top: 1.5rem;
+    border-top: 1px solid rgba(148, 163, 184, 0.35);
+}
+
+/* =========================
+   GLOBAL BUTTONS
+   ========================= */
+
+/* outline hijau untuk "+ Add Your Transaction Today" */
+.fin-btn-outline-green,
+.ft-btn-outline-green {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.6rem 1.6rem;
+    border-radius: 999px;
+    border: 2px solid var(--ft-green);
+    background-color: transparent;
+    color: var(--ft-green);
+    font-size: 0.95rem;
+    font-weight: 600;
+    transition:
+        background-color 150ms ease,
+        color 150ms ease,
+        box-shadow 150ms ease;
+}
+
+.fin-btn-outline-green:hover,
+.ft-btn-outline-green:hover {
+    background-color: var(--ft-green);
+    color: var(--ft-cream);
+    box-shadow: 0 8px 18px rgba(123, 173, 62, 0.35);
+}
+
+/* tombol utilitas */
+.fin-btn-dark,
+.fin-btn-red,
+.fin-btn-green,
+.fin-btn-blue {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.35rem 0.9rem;
+    border-radius: 999px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    border-width: 0;
+    cursor: pointer;
+}
+
+/* Edit button - dark blue */
+.fin-btn-dark {
+    background-color: var(--ft-navy);
+    color: var(--ft-cream);
+}
+.fin-btn-dark:hover {
+    background-color: #111827;
+}
+
+/* Delete button - merah */
+.fin-btn-red {
+    background-color: var(--ft-red);
+    color: var(--ft-cream);
+}
+.fin-btn-red:hover {
+    background-color: #a41414;
+}
+
+/* Button hijau (input transaction, category) */
+.fin-btn-green {
+    background-color: var(--ft-green);
+    color: var(--ft-cream);
+}
+.fin-btn-green:hover {
+    background-color: #679536;
+}
+
+/* Button biru (save, add new budget/goals) */
+.fin-btn-blue {
+    background-color: var(--ft-navy);
+    color: var(--ft-cream);
+}
+.fin-btn-blue:hover {
+    background-color: #111827;
+}
+
+/* Semua tombol primary bawaan Filament -> biru navy */
+button[data-color="primary"],
+.fi-btn[data-color="primary"],
+.fi-button[data-color="primary"],
+.fi-ac-btn[data-color="primary"] {
+    background-color: var(--ft-navy) !important;
+    border-color: var(--ft-navy) !important;
+    color: var(--ft-cream) !important;
+}
+
+/* tombol danger -> merah */
+.fi-btn[data-color="danger"],
+.fi-button[data-color="danger"] {
+    background-color: var(--ft-red) !important;
+    border-color: var(--ft-red) !important;
+    color: var(--ft-cream) !important;
+}
+
+/* =========================
+   MODAL / POPUP
+   ========================= */
+
+.fi-modal-window {
+    background-color: var(--ft-lime) !important;
+    color: var(--ft-navy) !important;
+}
+
+.fi-modal-backdrop {
+    background-color: rgba(15, 23, 42, 0.55) !important;
+}
+
+.fi-modal-window .fi-btn[data-color="danger"],
+.fi-modal-window .fi-button[data-color="danger"] {
+    background-color: var(--ft-red) !important;
+    border-color: var(--ft-red) !important;
+    color: var(--ft-cream) !important;
+}
+
+/* =========================
+   DASHBOARD LAYOUT
+   ========================= */
+
+
+.ft-page-subtitle {
+    font-size: 1.25rem;
+    color: var(--ft-navy);
+}
+
+/* summary row (income, expense, balance) */
+.ft-summary-row {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1.25rem;
+}
+
+@media (max-width: 1024px) {
+    .ft-summary-row {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+
+.ft-summary-card {
+    border-radius: 1.4rem;
+    padding: 1.3rem 1.5rem;
+    background-color: var(--ft-lime);
+    box-shadow: 0 12px 30px rgba(15,23,42,0.08);
+}
+
+.ft-summary-title {
+    font-size: 0.95rem;
+    margin-bottom: .35rem;
+    font-weight: 500;
+}
+
+.ft-summary-value {
+    font-size: 1.4rem;
+    font-weight: 700;
+}
+
+/* warna teks khusus summary */
+.ft-summary-income .ft-summary-title,
+.ft-summary-income .ft-summary-value {
+    color: var(--ft-green);
+}
+.ft-summary-expense .ft-summary-title,
+.ft-summary-expense .ft-summary-value {
+    color: var(--ft-red);
+}
+.ft-summary-balance .ft-summary-title,
+.ft-summary-balance .ft-summary-value {
+    color: var(--ft-navy);
+}
+
+/* toolbar tanggal + button add transaction */
+.ft-dashboard-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+    border-radius: 1.4rem;
+    padding: 1rem 1.25rem;
+    background-color: var(--ft-lime);
+    box-shadow: 0 10px 26px rgba(15,23,42,0.08);
+}
+
+.ft-date-range {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+.ft-label {
+    font-size: 0.85rem;
+    color: var(--ft-navy);
+}
+
+.ft-input-date {
+    border-radius: 9999px;
+    border: 1px solid rgba(15,23,42,0.15);
+    background-color: #ffffff;
+    padding: 0.4rem 0.9rem;
+    font-size: 0.9rem;
+    color: var(--ft-navy);
+}
+
+.ft-input-date:focus {
+    outline: 2px solid var(--ft-green);
+    outline-offset: 1px;
+}
+
+/* Dashboard grid: chart + list */
+.ft-dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1.5rem;
+}
+
+@media (max-width: 1024px) {
+    .ft-dashboard-grid {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+
+.ft-card {
+    border-radius: 1.4rem;
+    padding: 1.25rem 1.5rem;
+    box-shadow: 0 12px 30px rgba(15,23,42,0.12);
+}
+
+.ft-card-light {
+    background-color: var(--ft-lime);
+    color: var(--ft-navy);
+}
+
+.ft-section-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 0.9rem;
+    color: var(--ft-navy);
+}
+
+/* last transactions */
+.ft-last-transactions {
+    margin-top: 1.25rem;
+}
+
+.ft-last-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.75rem;
+}
+
+.ft-detail-title {
+    color: #1D4ED8;
+    font-weight: 600;
+}
+
+.ft-arrow-up-right {
+    margin-left: 0.25rem;
+    font-size: 0.9rem;
+}
+
+.ft-transaction-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.ft-transaction-item {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1rem;
+    border-bottom: 1px dashed rgba(15,23,42,0.15);
+    padding-bottom: 0.4rem;
+}
+
+.ft-transaction-main {
+    max-width: 70%;
+}
+
+.ft-transaction-title {
+    font-weight: 500;
+}
+
+.ft-transaction-meta {
+    font-size: 0.8rem;
+    opacity: 0.8;
+}
+
+.ft-transaction-amount {
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.ft-transaction-amount.is-expense {
+    color: var(--ft-red);
+}
+
+.ft-transaction-amount.is-income {
+    color: var(--ft-green);
+}
+
+.ft-empty-state {
+    font-size: 0.9rem;
+    opacity: 0.9;
+}
+
+/* =========================
+   TRANSACTIONS TABLE
+   ========================= */
+
+/* Table header & body teks gelap */
+.fi-ta-table th,
+.fi-ta-table td {
+    color: var(--ft-navy);
+}
+
+/* badge/pill pada type/category */
+.ft-pill {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.15rem 0.75rem;
+    border-radius: 999px;
+    font-size: 0.78rem;
+    font-weight: 500;
+}
+
+.ft-pill-income {
+    background-color: rgba(123, 173, 62, 0.14);
+    color: var(--ft-green);
+}
+
+.ft-pill-expense {
+    background-color: rgba(201, 32, 32, 0.15);
+    color: var(--ft-red);
+}
+
+.ft-pill-category {
+    background-color: rgba(148, 163, 184, 0.18);
+    color: var(--ft-navy);
+}
+
+/* filter pill row (All / Day / Month / Category) – pakai di header list */
+.ft-filter-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 1.2rem;
+}
+
+.ft-filter-pill {
+    padding: 0.35rem 1.2rem;
+    border-radius: 999px;
+    border: 1.5px solid var(--ft-green);
+    background-color: transparent;
+    color: var(--ft-navy);
+    font-size: 0.9rem;
+    cursor: pointer;
+}
+
+.ft-filter-pill.is-active {
+    background-color: var(--ft-green);
+    color: var(--ft-cream);
+}
+
+/* =========================
+   CATEGORIES PAGE
+   ========================= */
+
+.ft-category-badge {
+    @apply ft-pill ft-pill-category;
+}
+
+/* ============================================
+   BUDGET & GOALS PAGE (FIGMA STYLE)
+   ============================================ */
+
+.ft-budgets-layout {
+    display: flex;
+    flex-direction: column;
+    gap: 1.75rem;
+    padding-bottom: 1.5rem;
+}
+
+/* Header atas */
+.ft-budget-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.ft-page-title {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: var(--ft-navy);
+}
+
+.ft-page-subtitle {
+    font-size: 0.95rem;
+    color: rgba(31, 41, 55, 0.8);
+}
+
+/* Grid kartu */
+.ft-budget-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1.25rem;
+}
+
+@media (max-width: 1024px) {
+    .ft-budget-grid {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+
+.ft-budget-card {
+    background-color: var(--ft-lime);
+    border-radius: 1.25rem;
+    padding: 1.25rem 1.4rem;
+    box-shadow: 0 10px 24px rgba(15, 23, 42, 0.12);
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    color: var(--ft-navy);
+}
+
+.ft-budget-header-row {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 0.75rem;
+}
+
+.ft-budget-title {
+    font-size: 1.05rem;
+    font-weight: 600;
+}
+
+.ft-budget-sub {
+    font-size: 0.8rem;
+    opacity: 0.8;
+}
+
+.ft-budget-target {
+    font-size: 0.85rem;
+}
+
+/* Badge Budget / Goal */
+.ft-badge-type {
+    padding: 0.25rem 0.7rem;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    background-color: rgba(31, 41, 55, 0.1);
+    color: var(--ft-navy);
+}
+
+.ft-badge-goal {
+    background-color: rgba(37, 99, 235, 0.12);
+    color: #1D4ED8;
+}
+
+/* Progress bar */
+.ft-progress-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+}
+
+.ft-progress-track {
+    flex: 1;
+    height: 0.6rem;
+    border-radius: 999px;
+    background-color: rgba(15, 23, 42, 0.1);
+    overflow: hidden;
+}
+
+.ft-progress-bar {
+    height: 100%;
+    border-radius: 999px;
+    width: 0%;
+    transition: width 0.3s ease;
+}
+
+/* warna progress sesuai kondisi */
+.ft-progress-bar-success {
+    background-color: #7BAD3E;
+}
+
+.ft-progress-bar-warning {
+    background-color: #FACC15;
+}
+
+.ft-progress-bar-danger {
+    background-color: #DC2626;
+}
+
+.ft-progress-info {
+    font-size: 0.8rem;
+    text-align: right;
+    min-width: 70px;
+}
+
+/* Footer kartu */
+.ft-budget-footer {
+    margin-top: 0.35rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+}
+
+.ft-budget-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+/* Statistik bawah */
+.ft-statistic-card {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1rem;
+    background-color: var(--ft-lime);
+    border-radius: 1.25rem;
+    padding: 1rem 1.4rem;
+    box-shadow: 0 10px 24px rgba(15, 23, 42, 0.12);
+    color: var(--ft-navy);
+}
+
+@media (max-width: 1024px) {
+    .ft-statistic-card {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+
+.ft-stat-block {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+}
+
+.ft-stat-title {
+    font-size: 0.85rem;
+    opacity: 0.8;
+}
+
+.ft-stat-value {
+    font-size: 1.2rem;
+    font-weight: 700;
+}
+
+/* Modal delete */
+.ft-modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background-color: rgba(15, 23, 42, 0.55);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 50;
+}
+
+.ft-modal {
+    background-color: #CDF59C;
+    border-radius: 1.25rem;
+    padding: 1.5rem 1.75rem;
+    max-width: 420px;
+    width: 90%;
+    box-shadow: 0 20px 40px rgba(15, 23, 42, 0.45);
+    color: #111827;
+}
+
+.ft-modal-title {
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.ft-modal-text {
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+}
+
+.ft-modal-warning {
+    color: #B91C1C;
+    font-weight: 600;
+}
+
+.ft-modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.5rem;
+}
+
+
+
+/* =========================
+   FORMS (Input Transaction, Category, Budget/Goals)
+   ========================= */
+
+.fi-fo-component,
+.fi-fo-field-wrapper,
+.fi-fo-layout > div {
+    color: var(--ft-navy);
+}
+
+/* input field bg sedikit lebih terang */
+.fi-input,
+.fi-select,
+.fi-textarea {
+    background-color: #F3F4F6;
+    border-radius: 999px;
+}
+
+/* radio / checkbox label */
+.fi-radio-label,
+.fi-checkbox-label {
+    color: var(--ft-navy);
+}

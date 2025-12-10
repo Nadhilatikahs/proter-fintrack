@@ -2,24 +2,23 @@
 
 namespace App\Providers\Filament;
 
+use App\Filament\Pages\Dashboard as CustomDashboard;
+use App\Filament\Widgets\BudgetStatusWidget;
+use App\Filament\Widgets\MonthlyFinanceOverview;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
-use Filament\Pages;
+use Filament\Navigation\NavigationItem;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
-use Filament\Widgets;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
-use App\Filament\Widgets as AppWidgets;
-use App\Filament\Widgets\MonthlyFinanceOverview;
-use App\Filament\Widgets\BudgetStatusWidget;
 
 class AdminPanelProvider extends PanelProvider
 {
@@ -33,19 +32,35 @@ class AdminPanelProvider extends PanelProvider
             ->colors([
                 'primary' => Color::Amber,
             ])
-            ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
-            ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')
+            ->viteTheme('resources/css/filament-fintrack.css')
+
+            // Resources (BudgetGoalResource, CategoryResource, TransactionResource, dll)
+            ->discoverResources(
+                in: app_path('Filament/Resources'),
+                for: 'App\\Filament\\Resources',
+            )
+
+            // Pages (Dashboard custom, dsb — TIDAK termasuk BudgetGoals lagi)
+            ->discoverPages(
+                in: app_path('Filament/Pages'),
+                for: 'App\\Filament\\Pages',
+            )
             ->pages([
-                Pages\Dashboard::class,
+                CustomDashboard::class,
             ])
-            ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\\Filament\\Widgets')
+
+            // Widgets
+            ->discoverWidgets(
+                in: app_path('Filament/Widgets'),
+                for: 'App\\Filament\\Widgets',
+            )
             ->widgets([
-                Widgets\AccountWidget::class,
-                Widgets\FilamentInfoWidget::class,
                 MonthlyFinanceOverview::class,
                 BudgetStatusWidget::class,
             ])
+
             ->databaseNotifications()
+
             ->middleware([
                 EncryptCookies::class,
                 AddQueuedCookiesToResponse::class,
@@ -59,6 +74,14 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->authMiddleware([
                 Authenticate::class,
+            ])
+
+            ->navigationItems([
+                NavigationItem::make('Leave')
+                    ->group('Profile')
+                    ->icon('heroicon-o-arrow-left-on-rectangle')
+                    ->url('/logout')
+                    ->sort(99),
             ]);
     }
 }

@@ -20,9 +20,10 @@ class ReminderSettingResource extends Resource
 
     protected static ?string $navigationLabel = 'Reminder Settings';
 
-    protected static ?string $navigationGroup = 'Notifikasi';
+    //protected static ?string $navigationGroup = 'Notifikasi';
 
     protected static ?int $navigationSort = 1;
+    protected static bool $shouldRegisterNavigation = false;
 
     public static function form(Form $form): Form
     {

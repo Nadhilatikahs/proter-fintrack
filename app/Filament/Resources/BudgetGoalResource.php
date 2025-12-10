@@ -17,13 +17,17 @@ class BudgetGoalResource extends Resource
 {
     protected static ?string $model = BudgetGoal::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-flag';
+    /**
+     * Resource ini TIDAK muncul sendiri di sidebar.
+     * Sidebar pakai Page custom BudgetGoals.
+     */
+    protected static bool $shouldRegisterNavigation = false;
 
+    // Tetap boleh diset untuk dipakai di title dsb
     protected static ?string $navigationLabel = 'Budget & Goals';
-
-    protected static ?string $navigationGroup = 'Perencanaan';
-
-    protected static ?int $navigationSort = 1;
+    protected static ?string $navigationGroup = 'MENU';
+    protected static ?string $navigationIcon  = 'heroicon-o-banknotes';
+    protected static ?int    $navigationSort  = 10;
 
     public static function form(Form $form): Form
     {
@@ -48,13 +52,12 @@ class BudgetGoalResource extends Resource
                                 'goal'   => 'Goal',
                             ])
                             ->required()
-                            ->live(), // supaya bisa reaktif untuk field lainnya
+                            ->live(), // reaktif untuk field lain
                     ])
                     ->columns(2),
 
                 Forms\Components\Section::make('Detail')
                     ->schema([
-                        // hanya muncul untuk type = budget
                         Forms\Components\Select::make('period_type')
                             ->label('Periode budget')
                             ->options([
@@ -92,21 +95,27 @@ class BudgetGoalResource extends Resource
                     ->searchable()
                     ->wrap(),
 
+                // Badge Budget / Goal ala pill
                 Tables\Columns\TextColumn::make('type')
                     ->label('Tipe')
-                    ->badge()
-                    ->formatStateUsing(fn (string $state) => $state === 'budget' ? 'Budget' : 'Goal')
-                    ->colors([
-                        'info'    => 'budget',
-                        'success' => 'goal',
-                    ]),
+                    ->html()
+                    ->getStateUsing(function (BudgetGoal $record) {
+                        $label = $record->type === 'budget' ? 'Budget' : 'Goal';
+
+                        $class = $record->type === 'budget'
+                            ? 'ft-pill ft-pill-income'
+                            : 'ft-pill ft-pill-category';
+
+                        return "<span class=\"{$class}\">{$label}</span>";
+                    }),
 
                 Tables\Columns\TextColumn::make('period_type')
                     ->label('Periode')
-                    ->formatStateUsing(function ($state, $record) {
+                    ->formatStateUsing(function ($state, BudgetGoal $record) {
                         if ($record->type !== 'budget') {
                             return '-';
                         }
+
                         return match ($state) {
                             'daily'    => 'Per hari',
                             'weekly'   => 'Per minggu',
@@ -133,6 +142,28 @@ class BudgetGoalResource extends Resource
                         'budget' => 'Budget',
                         'goal'   => 'Goal',
                     ]),
+            ])
+            ->actions([
+                Tables\Actions\EditAction::make()
+                    ->label('Edit')
+                    ->button()
+                    ->extraAttributes(['class' => 'fin-btn-dark']),
+
+                Tables\Actions\DeleteAction::make()
+                    ->label('Delete')
+                    ->button()
+                    ->extraAttributes(['class' => 'fin-btn-red'])
+                    ->requiresConfirmation()
+                    ->modalHeading('Delete this budget/goal?')
+                    ->modalDescription('This action cannot be undone.'),
+            ])
+            ->bulkActions([
+                Tables\Actions\BulkActionGroup::make([
+                    Tables\Actions\DeleteBulkAction::make()
+                        ->requiresConfirmation()
+                        ->modalHeading('Delete selected budget/goals?')
+                        ->modalDescription('This action cannot be undone.'),
+                ]),
             ])
             ->defaultSort('created_at', 'desc');
     }
