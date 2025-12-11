@@ -15,8 +15,9 @@ class Transaction extends Model
         'code',
         'date',
         'title',
-        'type',        // income / expense
+        'type',
         'category_id',
+        'budget_goal_id',   // ⬅️ tambah ini
         'amount',
         'description',
     ];
@@ -25,16 +26,21 @@ class Transaction extends Model
         'date' => 'date',
     ];
 
-    public function user()
-    {
-        return $this->belongsTo(User::class);
-    }
-
     public function category()
     {
         return $this->belongsTo(Category::class);
     }
 
+    public function budgetGoal()
+    {
+        // Relasi ke BudgetGoal (type = goal)
+        return $this->belongsTo(BudgetGoal::class, 'budget_goal_id');
+    }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
     /**
      * Generate kode transaksi otomatis.
      */

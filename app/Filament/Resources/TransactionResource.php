@@ -5,18 +5,24 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\TransactionResource\Pages;
 use App\Models\Category;
 use App\Models\Transaction;
-use Carbon\Carbon;
+use App\Models\BudgetGoal;
 use Filament\Forms;
 use Filament\Forms\Form;
+use Filament\Forms\Get;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
+use Carbon\Carbon;
 
 class TransactionResource extends Resource
 {
     protected static ?string $model = Transaction::class;
+
+    // NAVIGASI KITA MATIKAN, KARENA PAKAI PAGE CUSTOM
+    protected static bool $shouldRegisterNavigation = false;
+
     protected static ?string $navigationLabel = 'Transactions';
     protected static ?string $navigationGroup = 'MENU';
     protected static ?string $navigationIcon = 'heroicon-o-arrow-path';
@@ -26,49 +32,71 @@ class TransactionResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\DatePicker::make('date')
-                    ->label('Tanggal transaksi')
-                    ->default(now())
-                    ->required(),
+                Forms\Components\Section::make()
+                    ->schema([
+                        Forms\Components\DatePicker::make('date')
+                            ->label('Date')
+                            ->default(now())
+                            ->required()
+                            ->native(false),
 
-                Forms\Components\TextInput::make('title')
-                    ->label('Nama transaksi')
-                    ->required()
-                    ->maxLength(255),
+                        Forms\Components\Select::make('category_id')
+                            ->label('Category')
+                            ->options(
+                                Category::where('user_id', Auth::id())
+                                    ->orderBy('name')
+                                    ->pluck('name', 'id')
+                            )
+                            ->required()
+                            ->searchable()
+                            ->preload(),
 
-                Forms\Components\Select::make('type')
-                    ->label('Tipe transaksi')
-                    ->options([
-                        'income'  => 'Income (Pemasukan)',
-                        'expense' => 'Expense (Pengeluaran)',
+                        Forms\Components\TextInput::make('amount')
+                            ->label('Amount')
+                            ->numeric()
+                            ->prefix('Rp')
+                            ->required(),
+
+                        Forms\Components\Select::make('type')
+                            ->label('Type')
+                            ->options([
+                                'income'  => 'Income',
+                                'expense' => 'Expense',
+                            ])
+                            ->default('expense')
+                            ->required()
+                            ->live(),
+
+                        // dropdown Goal muncul hanya kalau type = income
+                        Forms\Components\Select::make('budget_goal_id')
+                            ->label('Goal (optional)')
+                            ->options(function () {
+                                return BudgetGoal::query()
+                                    ->where('user_id', Auth::id())
+                                    ->where('type', 'goal')
+                                    ->orderBy('name')
+                                    ->pluck('name', 'id');
+                            })
+                            ->visible(fn (Get $get) => $get('type') === 'income')
+                            ->nullable()
+                            ->searchable()
+                            ->preload(),
+
+                        Forms\Components\TextInput::make('title')
+                            ->label('Name')
+                            ->required()
+                            ->maxLength(255),
+
+                        Forms\Components\Textarea::make('description')
+                            ->label('Description')
+                            ->rows(3)
+                            ->nullable(),
                     ])
-                    ->default('expense')
-                    ->required(),
-
-                Forms\Components\Select::make('category_id')
-                    ->label('Kategori')
-                    ->options(
-                        Category::where('user_id', Auth::id())
-                            ->orderBy('name')
-                            ->pluck('name', 'id')
-                    )
-                    ->searchable()
-                    ->preload()
-                    ->nullable(),
-
-                Forms\Components\TextInput::make('amount')
-                    ->label('Jumlah')
-                    ->numeric()
-                    ->prefix('Rp')
-                    ->required(),
-
-                Forms\Components\Textarea::make('description')
-                    ->label('Deskripsi')
-                    ->rows(3)
-                    ->nullable(),
+                    ->columns(2),
             ]);
     }
 
+    // Table masih kita biarkan, tapi praktis tidak dipakai lagi di UI
     public static function table(Table $table): Table
     {
         return $table
@@ -83,84 +111,45 @@ class TransactionResource extends Resource
                     ->searchable()
                     ->wrap(),
 
-                // Category pill biru
                 Tables\Columns\TextColumn::make('category.name')
                     ->label('Category')
-                    ->html()
-                    ->getStateUsing(function (Transaction $record) {
-                        $name = $record->category->name ?? '—';
-                        return "<span class=\"ft-pill ft-pill-category\">{$name}</span>";
-                    }),
+                    ->sortable(),
 
-                // Amount
                 Tables\Columns\TextColumn::make('amount')
                     ->label('Amount')
                     ->money('idr', true)
                     ->sortable(),
 
-                // Income / Expense pill
                 Tables\Columns\TextColumn::make('type')
                     ->label('Type')
-                    ->html()
-                    ->getStateUsing(function (Transaction $record) {
-                        $label = $record->type === 'income' ? 'Income' : 'Expense';
-                        $class = $record->type === 'income'
-                            ? 'ft-pill ft-pill-income'
-                            : 'ft-pill ft-pill-expense';
-
-                        return "<span class=\"{$class}\">{$label}</span>";
-                    }),
+                    ->badge()
+                    ->formatStateUsing(fn (string $state) => ucfirst($state))
+                    ->colors([
+                        'success' => 'income',
+                        'danger'  => 'expense',
+                    ]),
             ])
             ->filters([
-                // ALL → tidak mengubah query, hanya supaya chip "All" ada
-                Tables\Filters\Filter::make('all')
-                    ->label('All')
-                    ->query(fn (Builder $query) => $query),
-
-                // DAY → hari ini
-                Tables\Filters\Filter::make('day')
-                    ->label('Day')
+                Tables\Filters\Filter::make('today')
+                    ->label('Today')
                     ->query(fn (Builder $query) =>
                         $query->whereDate('date', Carbon::today())
                     ),
 
-                // MONTH → bulan ini
-                Tables\Filters\Filter::make('month')
-                    ->label('Month')
+                Tables\Filters\Filter::make('this_month')
+                    ->label('This month')
                     ->query(fn (Builder $query) =>
                         $query->whereYear('date', now()->year)
-                              ->whereMonth('date', now()->month)
+                            ->whereMonth('date', now()->month)
                     ),
 
-                // CATEGORY → dropdown kategori
-                Tables\Filters\SelectFilter::make('category_id')
-                    ->label('Category')
-                    ->relationship('category', 'name'),
+                Tables\Filters\Filter::make('this_year')
+                    ->label('This year')
+                    ->query(fn (Builder $query) =>
+                        $query->whereYear('date', now()->year)
+                    ),
             ])
-            ->actions([
-                Tables\Actions\EditAction::make()
-                    ->label('Edit')
-                    ->button()
-                    ->extraAttributes(['class' => 'fin-btn-dark']),
-
-                Tables\Actions\DeleteAction::make()
-                    ->label('Delete')
-                    ->button()
-                    ->extraAttributes(['class' => 'fin-btn-red'])
-                    ->requiresConfirmation()
-                    ->modalHeading('Are you sure you want to delete this transaction?')
-                    ->modalDescription('This action cannot be undone.'),
-            ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make()
-                        ->requiresConfirmation()
-                        ->modalHeading('Delete selected transactions?')
-                        ->modalDescription('This action cannot be undone.'),
-                ]),
-            ])
-            ->defaultSort('date', 'desc')
-            ->paginated([10, 25, 50, 100, 'all']);
+            ->defaultSort('date', 'desc');
     }
 
     public static function getEloquentQuery(): Builder

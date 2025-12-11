@@ -16,4 +16,24 @@ class CreateBudgetGoal extends CreateRecord
 
         return $data;
     }
+    /**
+     * Setelah create, selalu kembali ke halaman list Budget & Goals.
+     */
+    protected function getRedirectUrl(): string
+    {
+        return $this->getResource()::getUrl('index');
+    }
+
+    /**
+     * Rapikan tombol form: hanya Save + Cancel, label biru pakai CSS.
+     */
+    protected function getFormActions(): array
+    {
+        return [
+            $this->getCreateFormAction()
+                ->label('Save'),
+            $this->getCancelFormAction()
+                ->label('Cancel'),
+        ];
+    }
 }

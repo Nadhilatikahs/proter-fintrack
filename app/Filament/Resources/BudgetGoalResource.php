@@ -16,73 +16,75 @@ use Illuminate\Support\Facades\Auth;
 class BudgetGoalResource extends Resource
 {
     protected static ?string $model = BudgetGoal::class;
-
-    /**
-     * Resource ini TIDAK muncul sendiri di sidebar.
-     * Sidebar pakai Page custom BudgetGoals.
-     */
     protected static bool $shouldRegisterNavigation = false;
 
-    // Tetap boleh diset untuk dipakai di title dsb
-    protected static ?string $navigationLabel = 'Budget & Goals';
     protected static ?string $navigationGroup = 'MENU';
-    protected static ?string $navigationIcon  = 'heroicon-o-banknotes';
-    protected static ?int    $navigationSort  = 10;
+    protected static ?string $navigationIcon = 'heroicon-o-banknotes';
+    protected static ?int    $navigationSort = 10;
+    protected static ?string $navigationLabel = 'Budget & Goals';
 
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
-                Forms\Components\Section::make('Info utama')
+                // =======================
+                // SECTION INFO UTAMA
+                // =======================
+                Forms\Components\Section::make('Let`s achieve it!')
                     ->schema([
                         Forms\Components\TextInput::make('name')
-                            ->label('Nama')
+                            ->label('Name')
                             ->required()
                             ->maxLength(255),
 
                         Forms\Components\Textarea::make('description')
-                            ->label('Deskripsi')
+                            ->label('Description')
                             ->rows(3)
                             ->nullable(),
 
                         Forms\Components\Select::make('type')
-                            ->label('Tipe')
+                            ->label('Type')
                             ->options([
                                 'budget' => 'Budget',
                                 'goal'   => 'Goal',
                             ])
                             ->required()
-                            ->live(), // reaktif untuk field lain
+                            ->live(),
                     ])
-                    ->columns(2),
+                    // <<< di sini kuncinya: 1 kolom, jadi semua field turun ke bawah
+                    ->columns(1),
 
+                // =======================
+                // SECTION DETAIL
+                // =======================
                 Forms\Components\Section::make('Detail')
                     ->schema([
-                        Forms\Components\Select::make('period_type')
-                            ->label('Periode budget')
-                            ->options([
-                                'daily'    => 'Per hari',
-                                'weekly'   => 'Per minggu',
-                                'biweekly' => 'Per 2 minggu',
-                                'monthly'  => 'Per bulan',
-                                'yearly'   => 'Per tahun',
-                            ])
-                            ->visible(fn (Get $get) => $get('type') === 'budget')
-                            ->required(fn (Get $get) => $get('type') === 'budget'),
-
                         Forms\Components\TextInput::make('target_amount')
-                            ->label('Target / Batas nominal')
+                            ->label('Target / Max Amount')
                             ->numeric()
                             ->prefix('Rp')
                             ->required(),
 
+                        Forms\Components\Select::make('period_type')
+                            ->label('Budget Period')
+                            ->options([
+                                'daily'    => 'Dayly',
+                                'weekly'   => 'Weekly',
+                                'biweekly' => 'Biweekly',
+                                'monthly'  => 'Monthly',
+                                'yearly'   => 'Yearly',
+                            ])
+                            ->visible(fn (Get $get) => $get('type') === 'budget')
+                            ->required(fn (Get $get) => $get('type') === 'budget'),
+
                         Forms\Components\DatePicker::make('target_date')
-                            ->label('Tanggal pencapaian')
+                            ->label('Target Date')
                             ->visible(fn (Get $get) => $get('type') === 'goal')
                             ->required(fn (Get $get) => $get('type') === 'goal')
                             ->nullable(),
                     ])
-                    ->columns(3),
+                    // juga 1 kolom supaya Target / Periode / Tanggal turun ke bawah
+                    ->columns(1),
             ]);
     }
 
@@ -95,27 +97,21 @@ class BudgetGoalResource extends Resource
                     ->searchable()
                     ->wrap(),
 
-                // Badge Budget / Goal ala pill
                 Tables\Columns\TextColumn::make('type')
                     ->label('Tipe')
-                    ->html()
-                    ->getStateUsing(function (BudgetGoal $record) {
-                        $label = $record->type === 'budget' ? 'Budget' : 'Goal';
-
-                        $class = $record->type === 'budget'
-                            ? 'ft-pill ft-pill-income'
-                            : 'ft-pill ft-pill-category';
-
-                        return "<span class=\"{$class}\">{$label}</span>";
-                    }),
+                    ->badge()
+                    ->formatStateUsing(fn (string $state) => $state === 'budget' ? 'Budget' : 'Goal')
+                    ->colors([
+                        'info'    => 'budget',
+                        'success' => 'goal',
+                    ]),
 
                 Tables\Columns\TextColumn::make('period_type')
                     ->label('Periode')
-                    ->formatStateUsing(function ($state, BudgetGoal $record) {
+                    ->formatStateUsing(function ($state, $record) {
                         if ($record->type !== 'budget') {
                             return '-';
                         }
-
                         return match ($state) {
                             'daily'    => 'Per hari',
                             'weekly'   => 'Per minggu',
@@ -142,28 +138,6 @@ class BudgetGoalResource extends Resource
                         'budget' => 'Budget',
                         'goal'   => 'Goal',
                     ]),
-            ])
-            ->actions([
-                Tables\Actions\EditAction::make()
-                    ->label('Edit')
-                    ->button()
-                    ->extraAttributes(['class' => 'fin-btn-dark']),
-
-                Tables\Actions\DeleteAction::make()
-                    ->label('Delete')
-                    ->button()
-                    ->extraAttributes(['class' => 'fin-btn-red'])
-                    ->requiresConfirmation()
-                    ->modalHeading('Delete this budget/goal?')
-                    ->modalDescription('This action cannot be undone.'),
-            ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make()
-                        ->requiresConfirmation()
-                        ->modalHeading('Delete selected budget/goals?')
-                        ->modalDescription('This action cannot be undone.'),
-                ]),
             ])
             ->defaultSort('created_at', 'desc');
     }

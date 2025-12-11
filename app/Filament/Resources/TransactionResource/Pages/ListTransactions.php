@@ -13,7 +13,12 @@ class ListTransactions extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            Actions\CreateAction::make(),
+            Actions\CreateAction::make()
+                ->label('+ Input Transaction')
+                ->icon('heroicon-o-plus')
+                ->extraAttributes([
+                    'class' => 'fin-btn-outline ft-header-add-btn',
+                ]),
         ];
     }
 }

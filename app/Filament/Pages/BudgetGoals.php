@@ -15,18 +15,15 @@ class BudgetGoals extends Page
     protected static ?string $navigationGroup = 'MENU';
     protected static ?int    $navigationSort  = 10;
 
-    // penting: supaya route name = filament.admin.pages.budget-goals
-    protected static ?string $slug = 'budget-goals';
+    // PENTING: slug beda dengan resource, supaya tidak tabrakan route
+    protected static ?string $slug = 'budget-goals-overview';
 
     protected static string $view = 'filament.pages.budget-goals';
 
-    // untuk modal delete
+    // Livewire properties untuk modal delete
     public ?int $deleteId = null;
     public bool $showDeleteModal = false;
 
-    /**
-     * Data untuk Blade view.
-     */
     protected function getViewData(): array
     {
         $userId = Auth::id();
@@ -39,7 +36,6 @@ class BudgetGoals extends Page
             ->where('type', 'goal')
             ->get();
 
-        // Hitung progress budget
         foreach ($budgets as $budget) {
             $spent = $this->calculateBudgetSpent($budget);
             $budget->spent = $spent;
@@ -50,7 +46,6 @@ class BudgetGoals extends Page
             $budget->period_label = $this->formatPeriod($budget->period_type);
         }
 
-        // Hitung progress goals
         foreach ($goals as $goal) {
             $saved = $this->calculateGoalSaved($goal);
             $goal->saved = $saved;
@@ -63,10 +58,8 @@ class BudgetGoals extends Page
                 : '-';
         }
 
-        // Statistik bawah
-        $totalGoals    = $goals->count();
-        $totalAchieved = $goals->filter(fn ($g) => $g->progress >= 100)->count();
-
+        $totalGoals       = $goals->count();
+        $totalAchieved    = $goals->where('progress', '>=', 100)->count();
         $totalBudgetLimit = $budgets->sum('target_amount');
         $totalBudgetSpent = $budgets->sum('spent');
         $remainingBudget  = max(0, $totalBudgetLimit - $totalBudgetSpent);
@@ -82,11 +75,11 @@ class BudgetGoals extends Page
         ];
     }
 
-    // ==== Delete custom, dipakai modal ====
+    // ===== Actions dari modal =====
 
     public function confirmDelete(int $id): void
     {
-        $this->deleteId = $id;
+        $this->deleteId       = $id;
         $this->showDeleteModal = true;
     }
 
@@ -101,13 +94,13 @@ class BudgetGoals extends Page
             ->where('id', $this->deleteId)
             ->delete();
 
-        $this->deleteId = null;
+        $this->deleteId        = null;
         $this->showDeleteModal = false;
 
         $this->dispatch('$refresh');
     }
 
-    // ==== Logic perhitungan ====
+    // ===== Perhitungan =====
 
     protected function calculateBudgetSpent(BudgetGoal $budget): float
     {
@@ -143,10 +136,10 @@ class BudgetGoals extends Page
         $end   = $now->copy();
 
         return match ($periodType) {
-            'daily'    => [$start->startOfDay(), $end->endOfDay()],
-            'weekly'   => [$start->startOfWeek(), $end->endOfWeek()],
+            'daily'    => [$start->startOfDay(),   $end->endOfDay()],
+            'weekly'   => [$start->startOfWeek(),  $end->endOfWeek()],
             'biweekly' => [$start->copy()->subDays(13)->startOfDay(), $end->endOfDay()],
-            'yearly'   => [$start->startOfYear(), $end->endOfYear()],
+            'yearly'   => [$start->startOfYear(),  $end->endOfYear()],
             default    => [$start->startOfMonth(), $end->endOfMonth()],
         };
     }

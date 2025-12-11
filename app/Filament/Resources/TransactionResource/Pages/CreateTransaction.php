@@ -18,4 +18,18 @@ class CreateTransaction extends CreateRecord
 
         return $data;
     }
+    protected function getRedirectUrl(): string
+    {
+        return route('filament.admin.pages.transactions-overview');
+    }
+
+    protected function getFormActions(): array
+    {
+        return [
+            $this->getCreateFormAction()
+                ->label('Save'),
+            $this->getCancelFormAction()
+                ->label('Cancel'),
+        ];
+    }
 }

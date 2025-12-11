@@ -16,4 +16,18 @@ class CreateCategory extends CreateRecord
 
         return $data;
     }
+    protected function getRedirectUrl(): string
+    {
+        return $this->getResource()::getUrl('index');
+    }
+
+    protected function getFormActions(): array
+    {
+        return [
+            $this->getCreateFormAction()
+                ->label('Save'),
+            $this->getCancelFormAction()
+                ->label('Cancel'),
+        ];
+    }
 }

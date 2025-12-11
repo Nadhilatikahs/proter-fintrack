@@ -3,6 +3,7 @@
 namespace App\Providers\Filament;
 
 use App\Filament\Pages\Dashboard as CustomDashboard;
+use App\Filament\Pages\BudgetGoals;
 use App\Filament\Widgets\BudgetStatusWidget;
 use App\Filament\Widgets\MonthlyFinanceOverview;
 use Filament\Http\Middleware\Authenticate;
@@ -19,6 +20,7 @@ use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
+use App\Filament\Pages\TransactionsOverview;
 
 class AdminPanelProvider extends PanelProvider
 {
@@ -47,6 +49,8 @@ class AdminPanelProvider extends PanelProvider
             )
             ->pages([
                 CustomDashboard::class,
+                BudgetGoals::class,
+                TransactionsOverview::class,
             ])
 
             // Widgets
