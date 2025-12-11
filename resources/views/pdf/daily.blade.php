@@ -1,84 +1,49 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <title>Fintrack - Daily Transactions Report</title>
+    <meta charset="utf-8">
+    <title>Daily Transactions Report</title>
     <style>
-        * { box-sizing: border-box; font-family: DejaVu Sans, sans-serif; }
-        body { font-size: 12px; background: #f6ffe8; color: #111827; }
-        .header { margin-bottom: 16px; padding-bottom: 8px; border-bottom: 2px solid #a3e635; }
-        .title { font-size: 20px; font-weight: 700; color: #166534; }
-        .subtitle { font-size: 12px; margin-top: 4px; }
-        .summary-table { width: 100%; border-collapse: collapse; margin: 16px 0; }
-        .summary-table th,
-        .summary-table td { padding: 6px 8px; border: 1px solid #d4d4d4; text-align: left; }
-        .summary-table th { background: #bef264; }
-        .income { color: #16a34a; font-weight: bold; }
-        .expense { color: #dc2626; font-weight: bold; }
-        .net-positive { color: #16a34a; font-weight: bold; }
-        .net-negative { color: #dc2626; font-weight: bold; }
-        .table { width: 100%; border-collapse: collapse; margin-top: 8px; }
-        .table th, .table td { padding: 4px 6px; border: 1px solid #d4d4d4; }
-        .table th { background: #bbf7d0; }
+        body { font-family: DejaVu Sans, sans-serif; font-size: 11px; color: #111827; }
+        h1 { font-size: 18px; margin-bottom: 4px; }
+        h2 { font-size: 14px; margin: 12px 0 4px; }
+        .meta { font-size: 10px; color: #4b5563; margin-bottom: 10px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 8px; }
+        th, td { border: 1px solid #d1d5db; padding: 5px 6px; text-align: left; }
+        th { background: #e5e7eb; font-weight: 600; }
         .text-right { text-align: right; }
     </style>
 </head>
 <body>
-    <div class="header">
-        <div class="title">Fintrack – Daily Transactions Report</div>
-        <div class="subtitle">
-            Periode: {{ $from->format('d M Y') }} – {{ $to->format('d M Y') }}<br>
-            User: {{ $user->name ?? $user->email }}
-        </div>
+    <h1>Daily Transactions Report</h1>
+    <div class="meta">
+        Period: {{ $from }} s/d {{ $to }}<br>
+        Exported at: {{ $exportedAt }}
     </div>
 
-    <table class="summary-table">
-        <tr>
-            <th>Total Transaksi</th>
-            <th>Total Income</th>
-            <th>Total Expense</th>
-            <th>Net</th>
-        </tr>
-        @php $net = $summary['net'] ?? 0; @endphp
-        <tr>
-            <td>{{ $summary['count'] ?? 0 }}</td>
-            <td class="income">
-                Rp {{ number_format($summary['income'] ?? 0, 0, '.', ',') }}
-            </td>
-            <td class="expense">
-                Rp {{ number_format($summary['expense'] ?? 0, 0, '.', ',') }}
-            </td>
-            <td class="{{ $net >= 0 ? 'net-positive' : 'net-negative' }}">
-                Rp {{ number_format($net, 0, '.', ',') }}
-            </td>
-        </tr>
-    </table>
-
-    <h3>Detail Transaksi</h3>
-    <table class="table">
+    <table>
         <thead>
-            <tr>
-                <th>Tanggal</th>
-                <th>Kategori</th>
-                <th>Deskripsi</th>
-                <th>Tipe</th>
-                <th class="text-right">Amount</th>
-            </tr>
+        <tr>
+            <th>Date</th>
+            <th class="text-right">Income</th>
+            <th class="text-right">Expense</th>
+            <th class="text-right">Net</th>
+        </tr>
         </thead>
         <tbody>
-        @forelse ($transactions as $tx)
+        @forelse($rows as $row)
+            @php
+                $net = (float) $row->income - (float) $row->expense;
+            @endphp
             <tr>
-                <td>{{ \Carbon\Carbon::parse($tx->date)->format('d M Y') }}</td>
-                <td>{{ optional($tx->category)->name ?? '-' }}</td>
-                <td>{{ $tx->name }}</td>
-                <td>{{ ucfirst($tx->type) }}</td>
-                <td class="text-right">
-                    Rp {{ number_format($tx->amount, 0, '.', ',') }}
-                </td>
+                <td>{{ $row->date }}</td>
+                <td class="text-right">Rp {{ number_format($row->income, 0, ',', '.') }}</td>
+                <td class="text-right">Rp {{ number_format($row->expense, 0, ',', '.') }}</td>
+                <td class="text-right">Rp {{ number_format($net, 0, ',', '.') }}</td>
             </tr>
         @empty
             <tr>
-                <td colspan="5">Belum ada transaksi.</td>
+                <td colspan="4">No data for this period.</td>
             </tr>
         @endforelse
         </tbody>

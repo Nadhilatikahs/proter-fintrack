@@ -5,6 +5,7 @@ namespace App\Filament\Pages;
 use App\Models\Transaction;
 use App\Models\BudgetGoal;
 use Carbon\Carbon;
+use Filament\Actions\Action;
 use Filament\Pages\Page;
 use Illuminate\Support\Facades\Auth;
 
@@ -16,40 +17,22 @@ class Reports extends Page
     protected static ?int    $navigationSort  = 40;
     protected static ?string $navigationLabel = 'Reports';
 
-    // View khusus untuk page ini
     protected static string $view = 'filament.pages.reports';
 
     /** @var string cash-flow|budget|daily|goal */
     public string $tab = 'cash-flow';
 
-    /** mode tampilan (nanti bisa kita pakai) */
-    public string $periodMode = 'month'; // day | month | year
-
-    // Filter tanggal global untuk semua report
+    // filter tanggal global (dipakai cash-flow & daily)
     public ?string $fromDate = null;
     public ?string $toDate   = null;
 
     public function mount(): void
     {
-        // default: 1 bulan berjalan
-        $today = Carbon::today();
-
+        $today          = Carbon::today();
         $this->fromDate = $today->copy()->startOfMonth()->toDateString();
         $this->toDate   = $today->copy()->endOfMonth()->toDateString();
     }
 
-    /**
-     * Dipanggil saat klik tombol "Apply Filter".
-     * Tidak perlu isi apa-apa: Livewire akan re-render dan memanggil getViewData().
-     */
-    public function applyFilters(): void
-    {
-        // cukup kosong
-    }
-
-    /**
-     * Data yang dikirim ke Blade view.
-     */
     protected function getViewData(): array
     {
         return [
@@ -60,33 +43,12 @@ class Reports extends Page
         ];
     }
 
-    /**
-     * Helper: ambil range tanggal yang valid
-     */
-    protected function getDateRange(): array
-    {
-        if ($this->fromDate && $this->toDate) {
-            return [$this->fromDate, $this->toDate];
-        }
-
-        $today = Carbon::today();
-
-        return [
-            $today->copy()->startOfMonth()->toDateString(),
-            $today->copy()->endOfMonth()->toDateString(),
-        ];
-    }
-
-    /**
-     * CASH FLOW
-     * Line chart income vs expense + total summary.
-     */
+    /** CASH FLOW: income vs expense per hari + total summary */
     protected function getCashFlowData(): array
     {
         $userId = Auth::id();
-        [$start, $end] = $this->getDateRange();
 
-        if (! $userId) {
+        if (! $userId || ! $this->fromDate || ! $this->toDate) {
             return [
                 'labels'  => [],
                 'income'  => [],
@@ -96,39 +58,35 @@ class Reports extends Page
         }
 
         $rows = Transaction::query()
-            ->selectRaw('date, type, SUM(amount) AS total')
+            ->selectRaw('date,
+                SUM(CASE WHEN type = "income"  THEN amount ELSE 0 END) AS income,
+                SUM(CASE WHEN type = "expense" THEN amount ELSE 0 END) AS expense
+            ')
             ->where('user_id', $userId)
-            ->whereBetween('date', [$start, $end])
-            ->groupBy('date', 'type')
+            ->whereBetween('date', [$this->fromDate, $this->toDate])
+            ->groupBy('date')
             ->orderBy('date')
             ->get();
 
-        $dates   = [];
-        $income  = [];
-        $expense = [];
-
+        $labels       = [];
+        $incomeSeries = [];
+        $expenseSeries = [];
         $incomeTotal  = 0;
         $expenseTotal = 0;
 
-        // susun per tanggal
-        $grouped = $rows->groupBy('date');
-        foreach ($grouped as $date => $items) {
-            $dates[] = $date;
+        foreach ($rows as $row) {
+            $labels[]        = $row->date;
+            $incomeSeries[]  = (float) $row->income;
+            $expenseSeries[] = (float) $row->expense;
 
-            $incomeVal  = (float) ($items->firstWhere('type', 'income')->total ?? 0);
-            $expenseVal = (float) ($items->firstWhere('type', 'expense')->total ?? 0);
-
-            $income[]  = $incomeVal;
-            $expense[] = $expenseVal;
-
-            $incomeTotal  += $incomeVal;
-            $expenseTotal += $expenseVal;
+            $incomeTotal  += (float) $row->income;
+            $expenseTotal += (float) $row->expense;
         }
 
         return [
-            'labels'  => $dates,
-            'income'  => $income,
-            'expense' => $expense,
+            'labels'  => $labels,
+            'income'  => $incomeSeries,
+            'expense' => $expenseSeries,
             'total'   => [
                 'income'  => $incomeTotal,
                 'expense' => $expenseTotal,
@@ -137,26 +95,10 @@ class Reports extends Page
         ];
     }
 
-    /**
-     * BUDGET
-     * Bar chart horizontal per budget + ringkasan total.
-     */
+    /** BUDGET: progress tiap budget + summary total */
     protected function getBudgetData(): array
     {
         $userId = Auth::id();
-
-        if (! $userId) {
-            return [
-                'labels'  => [],
-                'limit'   => [],
-                'used'    => [],
-                'summary' => [
-                    'total_limit' => 0,
-                    'total_used'  => 0,
-                    'remaining'   => 0,
-                ],
-            ];
-        }
 
         $budgets = BudgetGoal::query()
             ->where('user_id', $userId)
@@ -167,9 +109,8 @@ class Reports extends Page
         $labels      = [];
         $limitValues = [];
         $usedValues  = [];
-
-        $totalLimit = 0;
-        $totalUsed  = 0;
+        $totalLimit  = 0;
+        $totalUsed   = 0;
 
         foreach ($budgets as $budget) {
             $labels[] = $budget->name;
@@ -196,22 +137,13 @@ class Reports extends Page
         ];
     }
 
-    /**
-     * DAILY
-     * Laporan per hari (income, expense, net).
-     */
+    /** DAILY: income / expense / net per hari */
     protected function getDailyData(): array
     {
         $userId = Auth::id();
-        [$start, $end] = $this->getDateRange();
 
-        if (! $userId) {
-            return [
-                'labels'  => [],
-                'income'  => [],
-                'expense' => [],
-                'net'     => [],
-            ];
+        if (! $userId || ! $this->fromDate || ! $this->toDate) {
+            return ['labels' => [], 'income' => [], 'expense' => [], 'net' => []];
         }
 
         $rows = Transaction::query()
@@ -220,7 +152,7 @@ class Reports extends Page
                 SUM(CASE WHEN type = "expense" THEN amount ELSE 0 END) AS expense
             ')
             ->where('user_id', $userId)
-            ->whereBetween('date', [$start, $end])
+            ->whereBetween('date', [$this->fromDate, $this->toDate])
             ->groupBy('date')
             ->orderBy('date')
             ->get();
@@ -240,21 +172,10 @@ class Reports extends Page
         return compact('labels', 'income', 'expense', 'net');
     }
 
-    /**
-     * GOAL
-     * Hitung berapa goal yang sudah tercapai & belum.
-     */
+    /** GOALS: jumlah goal selesai vs belum */
     protected function getGoalsData(): array
     {
         $userId = Auth::id();
-
-        if (! $userId) {
-            return [
-                'done'    => 0,
-                'running' => 0,
-                'total'   => 0,
-            ];
-        }
 
         $goals = BudgetGoal::query()
             ->where('user_id', $userId)
@@ -281,15 +202,13 @@ class Reports extends Page
         ];
     }
 
-    /**
-     * Helper: hitung pemakaian budget (reuse dari BudgetStatusWidget).
-     */
+    /** Helper budget spent */
     protected function calculateBudgetSpent(BudgetGoal $budget): float
     {
         $userId = $budget->user_id;
         $now    = Carbon::now();
 
-        [$start, $end] = $this->getPeriodRange($budget->period_type, $now);
+        [$start, $end] = $this->getPeriodRange($budget->period_type ?? 'monthly', $now);
 
         return Transaction::where('user_id', $userId)
             ->where('type', 'expense')
@@ -297,9 +216,7 @@ class Reports extends Page
             ->sum('amount');
     }
 
-    /**
-     * Helper: progress goal (contoh sederhana).
-     */
+    /** Helper goal progress */
     protected function calculateGoalProgress(BudgetGoal $goal): float
     {
         if ($goal->target_amount <= 0) {
@@ -317,9 +234,6 @@ class Reports extends Page
         return round(($saved / $goal->target_amount) * 100, 1);
     }
 
-    /**
-     * Periode budget (sama seperti di widget).
-     */
     protected function getPeriodRange(string $periodType, Carbon $now): array
     {
         $start = $now->copy();
@@ -334,12 +248,48 @@ class Reports extends Page
         };
     }
 
-    /**
-     * Untuk sekarang, kita tidak pakai header actions lama (export terpisah),
-     * karena export PDF akan kita handle lewat tombol di dalam view.
-     */
+    /** Actions di header untuk Export PDF */
     protected function getHeaderActions(): array
     {
-        return [];
+        $from = $this->fromDate;
+        $to   = $this->toDate;
+
+        return [
+            Action::make('exportCashFlow')
+                ->label('Export Cash Flow PDF')
+                ->icon('heroicon-o-document-arrow-down')
+                ->url(fn () => route('admin.reports.export', [
+                    'type' => 'cash-flow',
+                    'from' => $from,
+                    'to'   => $to,
+                ]))
+                ->openUrlInNewTab(),
+
+            Action::make('exportDaily')
+                ->label('Export Daily PDF')
+                ->icon('heroicon-o-document-arrow-down')
+                ->url(fn () => route('admin.reports.export', [
+                    'type' => 'daily',
+                    'from' => $from,
+                    'to'   => $to,
+                ]))
+                ->openUrlInNewTab(),
+
+            Action::make('exportBudget')
+                ->label('Export Budget PDF')
+                ->icon('heroicon-o-document-arrow-down')
+                ->url(fn () => route('admin.reports.export', [
+                    'type' => 'budget',
+                ]))
+                ->openUrlInNewTab(),
+
+            Action::make('exportGoal')
+                ->label('Export Goals PDF')
+                ->icon('heroicon-o-document-arrow-down')
+                ->url(fn () => route('admin.reports.export', [
+                    'type' => 'goal',
+                ]))
+                ->openUrlInNewTab(),
+        ];
     }
 }

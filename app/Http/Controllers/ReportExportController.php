@@ -2,9 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\BudgetGoal;
-use App\Models\Category;
 use App\Models\Transaction;
+use App\Models\BudgetGoal;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -12,210 +11,216 @@ use Illuminate\Support\Facades\Auth;
 
 class ReportExportController extends Controller
 {
-    public function export(string $type, Request $request)
+    public function export(Request $request)
     {
-        $user = Auth::user();
+        $type = $request->query('type', 'cash-flow');
+        $from = $request->query('from');
+        $to   = $request->query('to');
 
-        // Ambil range tanggal dari query (kalau ada), default 1 bulan terakhir
-        $from = $request->query('from')
-            ? Carbon::parse($request->query('from'))->startOfDay()
-            : now()->startOfMonth();
+        $userId = Auth::id();
 
-        $to = $request->query('to')
-            ? Carbon::parse($request->query('to'))->endOfDay()
-            : now()->endOfMonth();
+        if (! $userId) {
+            abort(403);
+        }
+
+        // Normalisasi tanggal
+        if ($from) {
+            $fromDate = Carbon::parse($from)->toDateString();
+        } else {
+            $fromDate = Carbon::now()->startOfMonth()->toDateString();
+        }
+
+        if ($to) {
+            $toDate = Carbon::parse($to)->toDateString();
+        } else {
+            $toDate = Carbon::now()->endOfMonth()->toDateString();
+        }
 
         switch ($type) {
             case 'cash-flow':
-                $data = $this->buildCashFlowData($user->id, $from, $to);
-                $view = 'reports.pdf.cash_flow';
-                $filename = 'fintrack-cash-flow-' . $from->format('Ymd') . '-' . $to->format('Ymd') . '.pdf';
+                $data     = $this->buildCashFlowData($userId, $fromDate, $toDate);
+                $view     = 'reports.pdf.cash-flow';
+                $filename = "cash-flow-{$fromDate}-{$toDate}.pdf";
                 break;
 
             case 'daily':
-                $data = $this->buildDailyTransactionsData($user->id, $from, $to);
-                $view = 'reports.pdf.daily';
-                $filename = 'fintrack-daily-transactions-' . $from->format('Ymd') . '-' . $to->format('Ymd') . '.pdf';
+                $data     = $this->buildDailyData($userId, $fromDate, $toDate);
+                $view     = 'reports.pdf.daily';
+                $filename = "daily-report-{$fromDate}-{$toDate}.pdf";
                 break;
 
             case 'budget':
-                $data = $this->buildBudgetData($user->id);
-                $view = 'reports.pdf.budget';
-                $filename = 'fintrack-budget-report.pdf';
+                $data     = $this->buildBudgetData($userId);
+                $view     = 'reports.pdf.budget';
+                $filename = "budget-report.pdf";
                 break;
 
             case 'goal':
-                $data = $this->buildGoalData($user->id);
-                $view = 'reports.pdf.goal';
-                $filename = 'fintrack-goals-report.pdf';
+                $data     = $this->buildGoalsData($userId);
+                $view     = 'reports.pdf.goals';
+                $filename = "goals-report.pdf";
                 break;
 
             default:
                 abort(404);
         }
 
-        // Tambahkan info umum (user + periode) ke data
-        $data['user'] = $user;
-        $data['from'] = $from;
-        $data['to']   = $to;
-
-        $pdf = Pdf::loadView($view, $data)->setPaper('a4', 'portrait');
+        $pdf = Pdf::loadView($view, array_merge($data, [
+            'exportedAt' => now(),
+        ]));
 
         return $pdf->download($filename);
     }
 
-    /* =========================
-     * DATA BUILDER PER REPORT
-     * ========================= */
-
-    protected function buildCashFlowData(int $userId, Carbon $from, Carbon $to): array
+    protected function buildCashFlowData(int $userId, string $from, string $to): array
     {
-        $transactions = Transaction::where('user_id', $userId)
-            ->whereBetween('date', [$from->toDateString(), $to->toDateString()])
+        $rows = Transaction::query()
+            ->selectRaw('date,
+                SUM(CASE WHEN type = "income"  THEN amount ELSE 0 END) AS income,
+                SUM(CASE WHEN type = "expense" THEN amount ELSE 0 END) AS expense
+            ')
+            ->where('user_id', $userId)
+            ->whereBetween('date', [$from, $to])
+            ->groupBy('date')
             ->orderBy('date')
             ->get();
 
-        $grouped = $transactions->groupBy('date');
+        $incomeTotal  = 0;
+        $expenseTotal = 0;
 
-        $rows = [];
-        $totalIncome = 0;
-        $totalExpense = 0;
-
-        foreach ($grouped as $date => $items) {
-            $income = $items->where('type', 'income')->sum('amount');
-            $expense = $items->where('type', 'expense')->sum('amount');
-            $diff = $income - $expense;
-
-            $totalIncome += $income;
-            $totalExpense += $expense;
-
-            $rows[] = [
-                'date'    => Carbon::parse($date)->format('d M Y'),
-                'income'  => $income,
-                'expense' => $expense,
-                'diff'    => $diff,
-            ];
+        foreach ($rows as $row) {
+            $incomeTotal  += (float) $row->income;
+            $expenseTotal += (float) $row->expense;
         }
 
         return [
-            'rows'  => $rows,
-            'total' => [
-                'income'  => $totalIncome,
-                'expense' => $totalExpense,
-                'diff'    => $totalIncome - $totalExpense,
-            ],
+            'from'         => $from,
+            'to'           => $to,
+            'rows'         => $rows,
+            'incomeTotal'  => $incomeTotal,
+            'expenseTotal' => $expenseTotal,
+            'diff'         => $incomeTotal - $expenseTotal,
         ];
     }
 
-    protected function buildDailyTransactionsData(int $userId, Carbon $from, Carbon $to): array
+    protected function buildDailyData(int $userId, string $from, string $to): array
     {
-        $transactions = Transaction::with('category')
+        $rows = Transaction::query()
+            ->selectRaw('date,
+                SUM(CASE WHEN type = "income"  THEN amount ELSE 0 END) AS income,
+                SUM(CASE WHEN type = "expense" THEN amount ELSE 0 END) AS expense
+            ')
             ->where('user_id', $userId)
-            ->whereBetween('date', [$from->toDateString(), $to->toDateString()])
+            ->whereBetween('date', [$from, $to])
+            ->groupBy('date')
             ->orderBy('date')
-            ->orderBy('created_at')
             ->get();
 
-        $totalIncome = $transactions->where('type', 'income')->sum('amount');
-        $totalExpense = $transactions->where('type', 'expense')->sum('amount');
-
         return [
-            'transactions' => $transactions,
-            'summary' => [
-                'count'   => $transactions->count(),
-                'income'  => $totalIncome,
-                'expense' => $totalExpense,
-                'net'     => $totalIncome - $totalExpense,
-            ],
+            'from' => $from,
+            'to'   => $to,
+            'rows' => $rows,
         ];
     }
 
     protected function buildBudgetData(int $userId): array
     {
-        $budgets = BudgetGoal::with('category')
+        $budgets = BudgetGoal::query()
             ->where('user_id', $userId)
             ->where('type', 'budget')
             ->get();
 
-        $rows = [];
         $totalLimit = 0;
-        $totalUsed = 0;
+        $totalUsed  = 0;
 
         foreach ($budgets as $budget) {
-            $used = $budget->transactions()
-                ->where('type', 'expense')
-                ->sum('amount');
+            $spent = $this->calculateBudgetSpent($budget);
+            $budget->spent    = $spent;
+            $budget->progress = $budget->target_amount > 0
+                ? round(min(100, ($spent / $budget->target_amount) * 100))
+                : 0;
 
-            $limit = $budget->target_amount ?? 0;
-            $remaining = max(0, $limit - $used);
-            $usage = $limit > 0 ? round($used / $limit * 100, 2) : 0;
-
-            $totalLimit += $limit;
-            $totalUsed += $used;
-
-            $rows[] = [
-                'name'      => $budget->name,
-                'category'  => optional($budget->category)->name ?? '-',
-                'limit'     => $limit,
-                'used'      => $used,
-                'remaining' => $remaining,
-                'usage'     => $usage,
-            ];
+            $totalLimit += (float) $budget->target_amount;
+            $totalUsed  += $spent;
         }
 
         return [
-            'rows' => $rows,
-            'summary' => [
-                'total_limit' => $totalLimit,
-                'total_used'  => $totalUsed,
-                'remaining'   => max(0, $totalLimit - $totalUsed),
-            ],
+            'budgets'        => $budgets,
+            'totalLimit'     => $totalLimit,
+            'totalUsed'      => $totalUsed,
+            'remaining'      => max(0, $totalLimit - $totalUsed),
         ];
     }
 
-    protected function buildGoalData(int $userId): array
+    protected function buildGoalsData(int $userId): array
     {
-        $goals = BudgetGoal::with('category')
+        $goals = BudgetGoal::query()
             ->where('user_id', $userId)
             ->where('type', 'goal')
             ->get();
 
-        $rows = [];
-        $total = $goals->count();
-        $done = 0;
+        $countDone    = 0;
+        $countRunning = 0;
 
         foreach ($goals as $goal) {
-            // contoh logika progress: jumlah semua income ke kategori goal
-            $saved = $goal->transactions()
-                ->where('type', 'income')
-                ->sum('amount');
-
-            $target = $goal->target_amount ?? 0;
-            $progress = $target > 0 ? round($saved / $target * 100, 2) : 0;
-            $status = $progress >= 100 ? 'Achieved' : 'In progress';
+            $progress = $this->calculateGoalProgress($goal);
+            $goal->progress = $progress;
 
             if ($progress >= 100) {
-                $done++;
+                $countDone++;
+            } else {
+                $countRunning++;
             }
-
-            $rows[] = [
-                'name'      => $goal->name,
-                'category'  => optional($goal->category)->name ?? '-',
-                'target'    => $target,
-                'saved'     => $saved,
-                'progress'  => $progress,
-                'status'    => $status,
-                'due_date'  => optional($goal->due_date ? Carbon::parse($goal->due_date) : null)?->format('d M Y'),
-            ];
         }
 
         return [
-            'rows' => $rows,
-            'summary' => [
-                'total'   => $total,
-                'done'    => $done,
-                'running' => max(0, $total - $done),
-            ],
+            'goals'   => $goals,
+            'done'    => $countDone,
+            'running' => $countRunning,
+            'total'   => $countDone + $countRunning,
         ];
+    }
+
+    protected function calculateBudgetSpent(BudgetGoal $budget): float
+    {
+        $now = Carbon::now();
+
+        [$start, $end] = $this->getPeriodRange($budget->period_type ?? 'monthly', $now);
+
+        return Transaction::where('user_id', $budget->user_id)
+            ->where('type', 'expense')
+            ->whereBetween('date', [$start->toDateString(), $end->toDateString()])
+            ->sum('amount');
+    }
+
+    protected function calculateGoalProgress(BudgetGoal $goal): float
+    {
+        if ($goal->target_amount <= 0) {
+            return 0;
+        }
+
+        $saved = Transaction::query()
+            ->where('user_id', $goal->user_id)
+            ->where('type', 'income')
+            ->when($goal->category_id ?? null, fn ($q, $categoryId) =>
+                $q->where('category_id', $categoryId)
+            )
+            ->sum('amount');
+
+        return round(($saved / $goal->target_amount) * 100, 1);
+    }
+
+    protected function getPeriodRange(string $periodType, Carbon $now): array
+    {
+        $start = $now->copy();
+        $end   = $now->copy();
+
+        return match ($periodType) {
+            'daily'    => [$start->startOfDay(), $end->endOfDay()],
+            'weekly'   => [$start->startOfWeek(), $end->endOfWeek()],
+            'biweekly' => [$start->copy()->subDays(13)->startOfDay(), $end->endOfDay()],
+            'yearly'   => [$start->startOfYear(), $end->endOfYear()],
+            default    => [$start->startOfMonth(), $end->endOfMonth()],
+        };
     }
 }

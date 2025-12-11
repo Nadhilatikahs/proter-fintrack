@@ -21,6 +21,7 @@ use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 use App\Filament\Pages\TransactionsOverview;
+use App\Filament\Pages\CategoriesOverview;
 
 class AdminPanelProvider extends PanelProvider
 {
@@ -51,6 +52,7 @@ class AdminPanelProvider extends PanelProvider
                 CustomDashboard::class,
                 BudgetGoals::class,
                 TransactionsOverview::class,
+                CategoriesOverview::class,
             ])
 
             // Widgets

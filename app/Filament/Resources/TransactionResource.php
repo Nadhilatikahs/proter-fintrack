@@ -15,6 +15,8 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
+use App\Rules\MaxWords;
+
 
 class TransactionResource extends Resource
 {
@@ -30,69 +32,108 @@ class TransactionResource extends Resource
 
     public static function form(Form $form): Form
     {
+        $userId = Auth::id();
+
         return $form
             ->schema([
-                Forms\Components\Section::make()
+                Forms\Components\Section::make('') // kartu hijau besar
                     ->schema([
-                        Forms\Components\DatePicker::make('date')
-                            ->label('Date')
-                            ->default(now())
-                            ->required()
-                            ->native(false),
+                        // ROW 1 : Date & Category
+                        Forms\Components\Grid::make(2)
+                            ->schema([
+                                Forms\Components\DatePicker::make('date')
+                                    ->label('Date')
+                                    ->default(now())
+                                    ->required()
+                                    ->displayFormat('M d, Y')
+                                    ->native(false) // paksa pakai flatpickr
+                                    ->extraAttributes([
+                                        'class' => 'ft-input',
+                                    ]),
 
-                        Forms\Components\Select::make('category_id')
-                            ->label('Category')
-                            ->options(
-                                Category::where('user_id', Auth::id())
-                                    ->orderBy('name')
-                                    ->pluck('name', 'id')
-                            )
-                            ->required()
-                            ->searchable()
-                            ->preload(),
+                                Forms\Components\Select::make('category_id')
+                                    ->label('Category')
+                                    ->options(
+                                        Category::where('user_id', $userId)
+                                            ->orderBy('name')
+                                            ->pluck('name', 'id')
+                                    )
+                                    ->required()
+                                    ->searchable()
+                                    ->preload()
+                                    ->extraAttributes([
+                                        'class' => 'ft-input ft-select',
+                                    ]),
+                            ]),
 
-                        Forms\Components\TextInput::make('amount')
-                            ->label('Amount')
-                            ->numeric()
-                            ->prefix('Rp')
-                            ->required(),
+                        // ROW 2 : Type & Name
+                        Forms\Components\Grid::make(2)
+                            ->schema([
+                                Forms\Components\Select::make('type')
+                                    ->label('Type')
+                                    ->options([
+                                        'income'  => 'Income',
+                                        'expense' => 'Expense',
+                                    ])
+                                    ->required()
+                                    ->default('expense')
+                                    ->live()
+                                    ->extraAttributes([
+                                        'class' => 'ft-input ft-select',
+                                    ]),
 
-                        Forms\Components\Select::make('type')
-                            ->label('Type')
-                            ->options([
-                                'income'  => 'Income',
-                                'expense' => 'Expense',
-                            ])
-                            ->default('expense')
-                            ->required()
-                            ->live(),
+                                Forms\Components\TextInput::make('title')
+                                    ->label('Name')
+                                    ->required()
+                                    ->maxLength(255)
+                                    ->extraAttributes([
+                                        'class' => 'ft-input',
+                                    ]),
+                            ]),
 
-                        // dropdown Goal muncul hanya kalau type = income
-                        Forms\Components\Select::make('budget_goal_id')
-                            ->label('Goal (optional)')
-                            ->options(function () {
-                                return BudgetGoal::query()
-                                    ->where('user_id', Auth::id())
-                                    ->where('type', 'goal')
-                                    ->orderBy('name')
-                                    ->pluck('name', 'id');
-                            })
-                            ->visible(fn (Get $get) => $get('type') === 'income')
-                            ->nullable()
-                            ->searchable()
-                            ->preload(),
+                        // ROW 3 : Amount & Goals (optional, hanya untuk income)
+                        Forms\Components\Grid::make(2)
+                            ->schema([
+                                Forms\Components\TextInput::make('amount')
+                                    ->label('Amount')
+                                    ->numeric()
+                                    ->prefix('Rp')
+                                    ->required()
+                                    ->extraAttributes([
+                                        'class' => 'ft-input',
+                                    ]),
 
-                        Forms\Components\TextInput::make('title')
-                            ->label('Name')
-                            ->required()
-                            ->maxLength(255),
+                                Forms\Components\Select::make('budget_goal_id')
+                                    ->label('Related Goal (optional)')
+                                    ->options(
+                                        BudgetGoal::where('user_id', $userId)
+                                            ->where('type', 'goal')
+                                            ->orderBy('name')
+                                            ->pluck('name', 'id')
+                                    )
+                                    ->visible(fn (Get $get) => $get('type') === 'income')
+                                    ->searchable()
+                                    ->preload()
+                                    ->nullable()
+                                    ->extraAttributes([
+                                        'class' => 'ft-input ft-select',
+                                    ]),
+                            ]),
 
+                        // ROW 4 : Description (full width + jarak)
                         Forms\Components\Textarea::make('description')
                             ->label('Description')
                             ->rows(3)
-                            ->nullable(),
+                            ->nullable()
+                            ->rule(new MaxWords(50))
+                            ->columnSpanFull()
+                            ->extraAttributes([
+                                'class' => 'ft-input mt-3',
+                            ]),
                     ])
-                    ->columns(2),
+                    ->extraAttributes([
+                        'class' => 'ft-card-form',
+                    ]),
             ]);
     }
 

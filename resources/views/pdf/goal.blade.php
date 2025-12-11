@@ -1,83 +1,57 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <title>Fintrack - Goals Report</title>
+    <meta charset="utf-8">
+    <title>Goals Report</title>
     <style>
-        * { box-sizing: border-box; font-family: DejaVu Sans, sans-serif; }
-        body { font-size: 12px; background: #f6ffe8; color: #111827; }
-        .header { margin-bottom: 16px; padding-bottom: 8px; border-bottom: 2px solid #a3e635; }
-        .title { font-size: 20px; font-weight: 700; color: #166534; }
-        .subtitle { font-size: 12px; margin-top: 4px; }
-        .summary-table { width: 100%; border-collapse: collapse; margin: 16px 0; }
-        .summary-table th,
-        .summary-table td { padding: 6px 8px; border: 1px solid #d4d4d4; text-align: left; }
-        .summary-table th { background: #bef264; }
-        .table { width: 100%; border-collapse: collapse; margin-top: 8px; }
-        .table th, .table td { padding: 4px 6px; border: 1px solid #d4d4d4; }
-        .table th { background: #bbf7d0; }
+        body { font-family: DejaVu Sans, sans-serif; font-size: 11px; color: #111827; }
+        h1 { font-size: 18px; margin-bottom: 4px; }
+        h2 { font-size: 14px; margin: 12px 0 4px; }
+        .meta { font-size: 10px; color: #4b5563; margin-bottom: 10px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 8px; }
+        th, td { border: 1px solid #d1d5db; padding: 5px 6px; text-align: left; }
+        th { background: #e5e7eb; font-weight: 600; }
         .text-right { text-align: right; }
-        .status-done { color: #16a34a; font-weight: bold; }
-        .status-progress { color: #eab308; font-weight: bold; }
+        .summary { margin-top: 10px; }
+        .summary div { margin-bottom: 3px; }
     </style>
 </head>
 <body>
-    <div class="header">
-        <div class="title">Fintrack – Goals Report</div>
-        <div class="subtitle">
-            User: {{ $user->name ?? $user->email }}
-        </div>
+    <h1>Goals Report</h1>
+    <div class="meta">
+        Exported at: {{ $exportedAt }}
     </div>
 
-    <table class="summary-table">
-        <tr>
-            <th>Total Goals</th>
-            <th>Achieved</th>
-            <th>In Progress</th>
-        </tr>
-        <tr>
-            <td>{{ $summary['total'] ?? 0 }}</td>
-            <td class="status-done">{{ $summary['done'] ?? 0 }}</td>
-            <td class="status-progress">{{ $summary['running'] ?? 0 }}</td>
-        </tr>
-    </table>
+    <h2>Summary</h2>
+    <div class="summary">
+        <div>Goals Achieved: {{ $done }}</div>
+        <div>Goals In Progress: {{ $running }}</div>
+        <div>Total Goals: {{ $total }}</div>
+    </div>
 
-    <h3>Detail Goals</h3>
-    <table class="table">
+    <h2>Goal Details</h2>
+    <table>
         <thead>
-            <tr>
-                <th>Nama Goal</th>
-                <th>Kategori</th>
-                <th class="text-right">Target</th>
-                <th class="text-right">Terkumpul</th>
-                <th>Deadline</th>
-                <th class="text-right">Progress</th>
-                <th>Status</th>
-            </tr>
+        <tr>
+            <th>Name</th>
+            <th class="text-right">Target Amount</th>
+            <th>Target Date</th>
+            <th class="text-right">Progress</th>
+        </tr>
         </thead>
         <tbody>
-        @forelse ($rows as $row)
-            @php
-                $statusClass = $row['status'] === 'Achieved' ? 'status-done' : 'status-progress';
-            @endphp
+        @forelse($goals as $goal)
             <tr>
-                <td>{{ $row['name'] }}</td>
-                <td>{{ $row['category'] }}</td>
+                <td>{{ $goal->name }}</td>
                 <td class="text-right">
-                    Rp {{ number_format($row['target'], 0, '.', ',') }}
+                    Rp {{ number_format($goal->target_amount ?? 0, 0, ',', '.') }}
                 </td>
-                <td class="text-right">
-                    Rp {{ number_format($row['saved'], 0, '.', ',') }}
-                </td>
-                <td>{{ $row['due_date'] ?? '-' }}</td>
-                <td class="text-right">
-                    {{ number_format($row['progress'], 2, '.', ',') }}%
-                </td>
-                <td class="{{ $statusClass }}">{{ $row['status'] }}</td>
+                <td>{{ optional($goal->target_date)->format('d M Y') ?? '-' }}</td>
+                <td class="text-right">{{ $goal->progress ?? 0 }}%</td>
             </tr>
         @empty
             <tr>
-                <td colspan="7">Belum ada data goals.</td>
+                <td colspan="4">No goals defined.</td>
             </tr>
         @endforelse
         </tbody>

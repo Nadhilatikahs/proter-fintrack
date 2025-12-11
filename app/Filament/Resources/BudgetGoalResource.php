@@ -12,6 +12,8 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
+use App\Rules\MaxWords;
+
 
 class BudgetGoalResource extends Resource
 {
@@ -40,7 +42,8 @@ class BudgetGoalResource extends Resource
                         Forms\Components\Textarea::make('description')
                             ->label('Description')
                             ->rows(3)
-                            ->nullable(),
+                            ->nullable()
+                            ->rule(new MaxWords(50)),
 
                         Forms\Components\Select::make('type')
                             ->label('Type')

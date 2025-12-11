@@ -2,147 +2,127 @@
 
 namespace App\Services;
 
+use App\Models\BudgetGoal;
 use App\Models\User;
 use Illuminate\Support\Facades\Http;
 
 class AiReminderService
 {
-    public function generateBudgetReminder(User $user, string $type, array $context): string
+    /**
+     * Pesan reminder untuk budget / goal.
+     * type: 'budget' atau 'goal'
+     * return null jika progress < 50 (tidak perlu notif).
+     */
+    public function budgetGoalMessage(BudgetGoal $goal, string $type, int $progress): ?string
     {
-        $prompt = $this->buildBudgetPrompt($user, $type, $context);
+        if ($progress < 50) {
+            return null;
+        }
 
-        return $this->callAiApi($prompt);
+        // Coba pakai AI kalau API key tersedia
+        $aiMessage = $this->tryCallAiForBudgetGoal($goal, $type, $progress);
+
+        if ($aiMessage) {
+            return $aiMessage;
+        }
+
+        // Fallback rule-based kalau AI tidak tersedia / error
+        return $this->ruleBasedBudgetGoalMessage($type, $progress);
     }
 
-    public function generateGoalReminder(User $user, array $context): string
+    protected function ruleBasedBudgetGoalMessage(string $type, int $progress): string
     {
-        $prompt = $this->buildGoalPrompt($user, $context);
+        if ($type === 'budget') {
+            if ($progress < 60) {
+                return 'Pengeluaran kamu sudah sekitar 50% dari limit periode ini. Mulai pantau transaksi supaya tidak kebablasan.';
+            } elseif ($progress < 70) {
+                return 'Limit sudah terpakai lebih dari 60%. Coba tahan pengeluaran yang tidak terlalu penting.';
+            } elseif ($progress < 80) {
+                return 'Pengeluaran sudah di atas 70%. Identifikasi kategori mana yang bisa dipangkas.';
+            } elseif ($progress < 90) {
+                return 'Sudah lewat 80% limit. Risiko tembus limit sangat tinggi jika tidak dikendalikan.';
+            } elseif ($progress < 100) {
+                return 'Hampir 100% limit terpakai. Hindari pengeluaran non-prioritas di sisa periode ini.';
+            }
 
-        return $this->callAiApi($prompt);
+            return 'Limit budget sudah terlampaui. Pertimbangkan revisi limit atau tunda pengeluaran berikutnya.';
+        }
+
+        // GOAL – nada motivasi
+        if ($progress < 60) {
+            return 'Tabungan kamu sudah mencapai sekitar 50% dari target. Pertahankan ritme nabungnya.';
+        } elseif ($progress < 70) {
+            return 'Target tabungan sudah lewat 60%. Sedikit lagi makin dekat dengan goal ini.';
+        } elseif ($progress < 80) {
+            return 'Tabungan sudah di atas 70%. Kalau konsisten, goal ini akan segera tercapai.';
+        } elseif ($progress < 90) {
+            return 'Sudah lewat 80% dari target. Ini saat yang bagus untuk mengunci jadwal nabung rutin.';
+        } elseif ($progress < 100) {
+            return 'Hampir 100%! Satu dorongan terakhir dan target ini akan tercapai.';
+        }
+
+        return 'Selamat! Target tabungan sudah tercapai. Kamu bisa mempertahankan kebiasaan ini atau set goal baru.';
     }
 
-    protected function buildBudgetPrompt(User $user, string $type, array $c): string
+    /**
+     * Pesan pengingat input transaksi harian.
+     * $timeLabel misal: 'pagi' atau 'malam'
+     */
+    public function dailyTransactionMessage(User $user, string $timeLabel): string
     {
-        $jenis      = $type === 'over_limit' ? 'MELEBIHI BATAS' : 'MENDekati batas';
-        $name       = $c['name'] ?? 'Budget';
-        $periodType = $c['period_type'] ?? 'monthly';
-
-        $target   = number_format((float) ($c['target_amount'] ?? 0), 0, ',', '.');
-        $spent    = number_format((float) ($c['spent'] ?? 0), 0, ',', '.');
-        $usage    = $c['usage_percentage'] ?? 0;
-        $timeProg = $c['time_progress_percentage'] ?? 0;
-        $start    = $c['period_start'] ?? '-';
-        $end      = $c['period_end'] ?? '-';
-        $daysPass = $c['days_passed'] ?? 0;
-        $period   = $c['period_days'] ?? 0;
-
-        $periodLabel = match ($periodType) {
-            'daily'    => 'per hari',
-            'weekly'   => 'per minggu',
-            'biweekly' => 'per 2 minggu',
-            'yearly'   => 'per tahun',
-            default    => 'per bulan',
+        // Bisa dibuat lebih personal kalau mau
+        return match ($timeLabel) {
+            'pagi'  => 'Jangan lupa input transaksi hari ini. Catat pengeluaran & pemasukan pagi ini supaya tidak lupa di akhir hari.',
+            'malam' => 'Sudah cek transaksi hari ini? Input pengeluaran & pemasukan sekarang sebelum kamu lupa.',
+            default => 'Jangan lupa input transaksi harian kamu hari ini.',
         };
-
-        return <<<PROMPT
-Aku adalah asisten keuangan pribadi yang GAYA BAHASANYA:
-- santai, gen Z, tapi tetap sopan dan tidak kasar,
-- boleh pakai sedikit kata gaul (misalnya "anjay", "santuy", "gaskeun") dan emoji,
-- TIDAK boleh menggunakan kata-kata menghina, SARA, atau vulgar.
-
-Nama pengguna: {$user->name}
-
-Situasi budget:
-- Nama budget: {$name}
-- Jenis budget: {$periodLabel}
-- Jenis reminder: {$jenis}
-- Periode budget: {$start} s/d {$end} (total sekitar {$period} hari)
-- Batas budget (target_amount): Rp {$target}
-- Sudah terpakai (spent): Rp {$spent}
-- Persentase pemakaian (usage_percentage): {$usage}%
-- Progress waktu periode (time_progress_percentage): {$timeProg}% (misalnya baru {$daysPass} hari berjalan)
-
-Tugasmu:
-- Tulis 1 PARAGRAF SINGKAT dalam bahasa Indonesia yang:
-  - gaya santai dan friendly, cocok buat anak muda,
-  - menyebutkan kondisi pemakaian budget (misalnya "budget kamu udah kepake 50%"),
-  - kalau usage lebih besar dari progress waktu (pemakaian lebih ngebut dari waktunya), kamu boleh kasih peringatan lucu,
-  - beri 1–2 saran praktis (misalnya "coba tahan dulu jajan kopi" atau "review pengeluaran yang nggak terlalu penting"),
-  - maksimal 3 kalimat,
-  - boleh pakai 2–4 emoji yang relevan.
-
-Jangan tulis intro seperti "Halo, berikut ini adalah..." langsung ke pesan. Jangan menyebut bahwa kamu adalah AI.
-PROMPT;
     }
 
-    protected function buildGoalPrompt(User $user, array $c): string
-    {
-        $target     = number_format((float) ($c['target_amount'] ?? 0), 0, ',', '.');
-        $name       = $c['name'] ?? 'Goal';
-        $targetDate = $c['target_date'] ?? '-';
-        $daysLeft   = $c['days_left'] ?? 0;
-
-        return <<<PROMPT
-Aku adalah asisten keuangan pribadi dengan gaya santai dan suportif.
-
-GAYA BAHASA:
-- santai, sedikit gen Z, tapi tetap sopan,
-- boleh pakai emoji (2–4 emoji maksimal),
-- jangan pakai kata kasar atau menghina.
-
-Info goal:
-- Nama goal: {$name}
-- Target dana: Rp {$target}
-- Target date: {$targetDate}
-- Sisa hari menuju target: {$daysLeft} hari
-
-Tugas:
-- Tulis 1 paragraf pendek dalam bahasa Indonesia yang:
-  - memberi semangat bahwa goal ini makin deket,
-  - mengingatkan bahwa waktu makin sedikit (kalau sisa harinya sedikit),
-  - menyarankan langkah kecil yang bisa dilakukan (misalnya nabung rutin tiap minggu),
-  - maksimal 3 kalimat,
-  - cocok untuk user bernama {$user->name} (boleh sebut namanya sekali).
-
-Jangan tulis "Halo saya AI", langsung ke isi pesan.
-PROMPT;
-    }
-
-    protected function callAiApi(string $prompt): string
+    /**
+     * OPTIONAL: panggil OpenAI API untuk bikin pesan lebih “AI”.
+     * Set `services.openai.key` di config kalau mau pakai.
+     */
+    protected function tryCallAiForBudgetGoal(BudgetGoal $goal, string $type, int $progress): ?string
     {
         $apiKey = config('services.openai.key');
 
         if (! $apiKey) {
-            // fallback kalau belum setting API key
-            return '📌 Reminder keuangan: tunggu sebentar yach, budget & goal kamu lagi dicek sistem nich. Coba intip dashboard Fintrack dulu ya biar nggak kebablasan 😉';
+            return null;
         }
+
+        $role = $type === 'budget' ? 'budget limit' : 'saving goal';
+
+        $prompt = sprintf(
+            "Buat satu kalimat singkat (maks 35 kata) dalam bahasa Indonesia, nada singkat dan jelas, sebagai reminder untuk user tentang %s dengan progress %d%%.
+Nama: %s, target: Rp %s. Jangan pakai emoji.",
+            $role,
+            $progress,
+            $goal->name,
+            number_format($goal->target_amount ?? 0, 0, ',', '.')
+        );
 
         try {
             $response = Http::withToken($apiKey)
                 ->post('https://api.openai.com/v1/chat/completions', [
-                    'model'    => 'gpt-4.1-mini',
+                    'model' => 'gpt-4.1-mini', // atau model lain yang kamu pakai
                     'messages' => [
-                        [
-                            'role'    => 'system',
-                            'content' => 'Hi, aku asisten keuangan pribadi kamu, gaya santai, sedikit gen Z, tapi tetap sopan. Tidak boleh kasar atau menghina.',
-                        ],
-                        [
-                            'role'    => 'user',
-                            'content' => $prompt,
-                        ],
+                        ['role' => 'system', 'content' => 'Kamu asisten finansial yang sangat ringkas.'],
+                        ['role' => 'user', 'content' => $prompt],
                     ],
-                    'max_tokens' => 200,
+                    'max_tokens' => 120,
+                    'temperature' => 0.4,
                 ]);
 
             if (! $response->successful()) {
-                return '📌 Reminder keuangan: sistem gagal menghubungi layanan AI, tapi budget/goal kamu lagi rawan nih. Coba cek Fintrack dulu ya 🙏';
+                return null;
             }
 
             $text = $response->json('choices.0.message.content');
 
-            return $text ? trim($text) : '📌 Reminder keuangan otomatis dari Fintrack.';
+            return $text ? trim($text) : null;
         } catch (\Throwable $e) {
-            return '📌 Reminder keuangan: ada kendala teknis ringan. Untuk sementara, cek lagi pengeluaran dan budget kamu di Fintrack ya 🙌';
+            // Jangan sampai command mati hanya karena AI error
+            return null;
         }
     }
 }

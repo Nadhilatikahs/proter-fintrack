@@ -15,6 +15,10 @@ use Illuminate\Support\Facades\Auth;
 class CategoryResource extends Resource
 {
     protected static ?string $model = Category::class;
+
+    // LIST TIDAK MUNCUL DI SIDEBAR, KITA PAKAI PAGE CUSTOM
+    protected static bool $shouldRegisterNavigation = false;
+
     protected static ?string $navigationLabel = 'Categories';
     protected static ?string $navigationGroup = 'MENU';
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-group';
@@ -24,20 +28,29 @@ class CategoryResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\TextInput::make('name')
-                    ->label('Nama kategori')
-                    ->required()
-                    ->maxLength(255),
+                Forms\Components\Section::make('Category')
+                    ->schema([
+                        Forms\Components\TextInput::make('name')
+                            ->label('Category name')
+                            ->required()
+                            ->maxLength(255),
 
-                Forms\Components\Textarea::make('description')
-                    ->label('Deskripsi')
-                    ->rows(3)
-                    ->nullable(),
+                        Forms\Components\Textarea::make('description')
+                            ->label('Description')
+                            ->rows(3)
+                            ->nullable(),
+                    ])
+                    ->columns(1) // vertikal, satu kolom
+                    ->extraAttributes([
+                        'class' => 'ft-form-card', // sudah dipakai di halaman lain
+                    ]),
             ]);
     }
 
     public static function table(Table $table): Table
     {
+        // tabel ini tetap dipakai untuk CRUD (create/edit/delete) lewat route filament,
+        // tapi BUKAN untuk tampilan utama (kita pakai page custom).
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('name')
@@ -53,28 +66,6 @@ class CategoryResource extends Resource
                 Tables\Columns\TextColumn::make('transactions_count')
                     ->counts('transactions')
                     ->label('Jumlah transaksi'),
-            ])
-            ->actions([
-                Tables\Actions\EditAction::make()
-                    ->label('Edit')
-                    ->button()
-                    ->extraAttributes(['class' => 'fin-btn-dark']),
-
-                Tables\Actions\DeleteAction::make()
-                    ->label('Delete')
-                    ->button()
-                    ->extraAttributes(['class' => 'fin-btn-red'])
-                    ->requiresConfirmation()
-                    ->modalHeading('Delete this category?')
-                    ->modalDescription('This action cannot be undone.'),
-            ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make()
-                        ->requiresConfirmation()
-                        ->modalHeading('Delete selected categories?')
-                        ->modalDescription('This action cannot be undone.'),
-                ]),
             ])
             ->defaultSort('name', 'asc');
     }

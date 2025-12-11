@@ -53,5 +53,7 @@ Route::get('/admin/budget-goals-alias', function () {
     return redirect()->route('filament.admin.resources.budget-goals.index');
 })->name('filament.admin.pages.budget-goals');
 
-
+Route::middleware(['auth'])
+    ->get('/admin/reports/export', [ReportExportController::class, 'export'])
+    ->name('admin.reports.export');
 require __DIR__.'/auth.php';
