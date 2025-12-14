@@ -8,33 +8,69 @@
 @endsection
 
 @section('content')
-    <div class="ft-page-header-row">
-        <a href="{{ route('categories.create') }}" class="ft-btn ft-btn-primary">
-            + Add new category
-        </a>
-    </div>
+<div class="ft-cat-layout">
+    <div class="ft-cat-container">
 
-    <div class="ft-budget-grid">
-        @forelse($categories as $cat)
-            <div class="ft-card ft-budget-card">
-                <div class="ft-card-header">
-                    <div>
-                        <div class="ft-budget-name">{{ $cat->name }}</div>
-                        <div class="ft-budget-meta">{{ $cat->description }}</div>
+        {{-- HEADER --}}
+        <div class="ft-cat-header">
+            <h1 class="ft-page-title">Categories</h1>
+
+            <a href="{{ route('categories.create') }}"
+               class="ft-btn-outline-green">
+                + Input Categories
+            </a>
+        </div>
+
+        {{-- TABLE HEAD --}}
+        <div class="ft-cat-table-head">
+            <div>Date</div>
+            <div>Category</div>
+            <div class="text-right">Actions</div>
+        </div>
+
+        {{-- LIST --}}
+        <div class="ft-cat-list">
+            @forelse ($categories as $cat)
+                <div class="ft-cat-row">
+
+                    {{-- DATE --}}
+                    <div class="ft-cat-date">
+                        {{ $cat->created_at->format('d F Y') }}
                     </div>
-                    <div class="ft-budget-actions">
-                        <a href="{{ route('categories.edit',$cat) }}" class="ft-link-sm">Edit</a>
-                        <form action="{{ route('categories.destroy',$cat) }}" method="POST"
+
+                    {{-- CATEGORY --}}
+                    <div class="ft-cat-name">
+                        <span class="ft-pill ft-pill-category">
+                            {{ $cat->name }}
+                        </span>
+                    </div>
+
+                    {{-- ACTIONS --}}
+                    <div class="ft-cat-actions">
+                        <a href="{{ route('categories.edit',$cat) }}"
+                           class="fin-btn-dark">
+                            Edit
+                        </a>
+
+                        <form method="POST"
+                              action="{{ route('categories.destroy',$cat) }}"
                               onsubmit="return confirm('Yakin ingin menghapus kategori ini?');">
                             @csrf
                             @method('DELETE')
-                            <button class="ft-link-sm ft-text-expense" type="submit">Delete</button>
+                            <button class="fin-btn-red" type="submit">
+                                Delete
+                            </button>
                         </form>
                     </div>
+
                 </div>
-            </div>
-        @empty
-            <p>Belum ada kategori. Coba buat kategori Food, Lifestyle, dll dulu 😊</p>
-        @endforelse
+            @empty
+                <div class="ft-empty-text">
+                    Belum ada kategori. Coba buat kategori Food, Lifestyle, dll dulu.
+                </div>
+            @endforelse
+        </div>
+
     </div>
+</div>
 @endsection

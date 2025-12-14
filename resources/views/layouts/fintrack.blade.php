@@ -18,7 +18,7 @@
         <div class="ft-sidebar-inner">
             {{-- Logo, nanti kamu ganti ke SVG sendiri --}}
             <div class="ft-logo">
-                <img src="{{ asset('images/fintrack-logo.svg') }}" alt="Fintrack">
+                <img src="{{ asset('public/images/fintrack-logo.svg') }}" alt="Fintrack">
             </div>
 
             <div class="ft-menu-label">MENU</div>

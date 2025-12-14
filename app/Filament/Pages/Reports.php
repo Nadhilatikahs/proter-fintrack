@@ -24,7 +24,16 @@ class Reports extends Page
 
         /*
         |--------------------------------------------------------------------------
-        | FILTER RANGE (CASH FLOW)
+        | DATE (GLOBAL – WAJIB ADA)
+        |--------------------------------------------------------------------------
+        */
+        $date = request('date')
+            ? Carbon::parse(request('date'))->startOfDay()
+            : now()->startOfDay();
+
+        /*
+        |--------------------------------------------------------------------------
+        | RANGE FILTER (CASH FLOW)
         |--------------------------------------------------------------------------
         */
         $from = request('from')
@@ -37,7 +46,7 @@ class Reports extends Page
 
         /*
         |--------------------------------------------------------------------------
-        | CASH FLOW RAW
+        | CASH FLOW
         |--------------------------------------------------------------------------
         */
         $cashflowRaw = Transaction::select(
@@ -51,31 +60,20 @@ class Reports extends Page
             ->orderBy('day')
             ->get();
 
-        /*
-        |--------------------------------------------------------------------------
-        | NORMALISASI RANGE (NO GAP)
-        |--------------------------------------------------------------------------
-        */
-        $period = $from->daysUntil($to);
+        $period = Carbon::parse($from)->daysUntil($to);
 
-        $labels  = [];
-        $income  = [];
+        $labels = [];
+        $income = [];
         $expense = [];
 
         foreach ($period as $d) {
-            $day = $d->format('Y-m-d');
-            $row = $cashflowRaw->firstWhere('day', $day);
+            $row = $cashflowRaw->firstWhere('day', $d->format('Y-m-d'));
 
             $labels[]  = $d->format('d M');
             $income[]  = (int) ($row->income ?? 0);
             $expense[] = (int) ($row->expense ?? 0);
         }
 
-        /*
-        |--------------------------------------------------------------------------
-        | SUMMARY CASH FLOW
-        |--------------------------------------------------------------------------
-        */
         $totalIncome  = array_sum($income);
         $totalExpense = array_sum($expense);
         $selisih      = $totalIncome - $totalExpense;
@@ -97,16 +95,11 @@ class Reports extends Page
                 $b->spent   = (int) ($b->spent ?? 0);
                 $b->remain  = max($b->amount - $b->spent, 0);
                 $b->percent = $b->amount > 0
-                    ? round(($b->spent / $b->amount) * 100, 1)
+                    ? min(100, round(($b->spent / $b->amount) * 100))
                     : 0;
                 return $b;
             });
 
-        /*
-        |--------------------------------------------------------------------------
-        | BUDGET SUMMARY
-        |--------------------------------------------------------------------------
-        */
         $totalBudget = $budgets->sum('amount');
         $totalSpent  = $budgets->sum('spent');
         $totalRemain = max($totalBudget - $totalSpent, 0);
@@ -127,29 +120,38 @@ class Reports extends Page
                 $g->target  = (int) $g->target_amount;
                 $g->saved   = (int) ($g->saved ?? 0);
                 $g->percent = $g->target > 0
-                    ? round(($g->saved / $g->target) * 100, 1)
+                    ? min(100, round(($g->saved / $g->target) * 100))
                     : 0;
                 return $g;
             });
 
         /*
         |--------------------------------------------------------------------------
-        | DAILY (BY DATE PICKER)
+        | DAILY (FIXED)
         |--------------------------------------------------------------------------
         */
         $dailyDate = request('date')
             ? Carbon::parse(request('date'))
             : now();
 
+        $dailyFrom = $dailyDate->copy()->startOfDay();
+        $dailyTo   = $dailyDate->copy()->endOfDay();
+
         $dailyRows = Transaction::with('category')
             ->where('user_id', $userId)
-            ->whereDate('date', $dailyDate)
+            ->whereBetween('date', [$dailyFrom, $dailyTo])
             ->orderBy('date')
             ->get();
 
-        $dailyIncome  = $dailyRows->where('type', 'income')->sum('amount');
-        $dailyExpense = $dailyRows->where('type', 'expense')->sum('amount');
+        /*
+        |--------------------------------------------------------------------------
+        | DAILY SUMMARY (REAL DATA)
+        |--------------------------------------------------------------------------
+        */
+        $dailyIncome  = (int) $dailyRows->where('type', 'income')->sum('amount');
+        $dailyExpense = (int) $dailyRows->where('type', 'expense')->sum('amount');
         $dailySelisih = $dailyIncome - $dailyExpense;
+
 
         return compact(
             // cashflow
@@ -168,7 +170,7 @@ class Reports extends Page
             'totalRemain',
 
             // daily
-            'dailyDate',
+            'date',
             'dailyRows',
             'dailyIncome',
             'dailyExpense',
@@ -177,46 +179,6 @@ class Reports extends Page
             // filter
             'from',
             'to'
-        );
-    }
-
-    /*
-    |--------------------------------------------------------------------------
-    | EXPORT PDF
-    |--------------------------------------------------------------------------
-    */
-    public function exportDailyPdf()
-    {
-        $data = $this->getViewData();
-
-        $pdf = Pdf::loadView('pdf.daily-report', $data)
-            ->setPaper('A4', 'portrait');
-
-        return response()->streamDownload(
-            fn () => print($pdf->output()),
-            'daily-report-' . $data['dailyDate']->format('Y-m-d') . '.pdf'
-        );
-    }
-
-    public function exportCashflowPdf()
-    {
-        $pdf = Pdf::loadView('pdf.cashflow-report', $this->getViewData())
-            ->setPaper('A4', 'portrait');
-
-        return response()->streamDownload(
-            fn () => print($pdf->output()),
-            'cashflow-report-' . now()->format('Y-m-d') . '.pdf'
-        );
-    }
-
-    public function exportBudgetGoalPdf()
-    {
-        $pdf = Pdf::loadView('pdf.budget-goal-report', $this->getViewData())
-            ->setPaper('A4', 'portrait');
-
-        return response()->streamDownload(
-            fn () => print($pdf->output()),
-            'budget-goal-report-' . now()->format('Y-m-d') . '.pdf'
         );
     }
 }
