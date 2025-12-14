@@ -265,7 +265,7 @@
     {{-- ================= DAILY ================= --}}
     <div x-show="tab==='daily'" x-transition class="space-y-6">
 
-        {{-- SUMMARY WIDGET (DAILY) --}}
+        {{-- ===== SUMMARY WIDGET ===== --}}
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
 
             {{-- TOTAL --}}
@@ -295,44 +295,57 @@
         </div>
 
 
-        {{-- DATE PICKER --}}
-        <form method="GET" class="mt-2">
-            <input
-                type="date"
-                name="date"
-                value="{{ $date->format('Y-m-d') }}"
-                class="ft-input-date date-black-icon"
-                onchange="this.form.submit()"
-            >
-        </form>
 
-        {{-- TABLE --}}
-        <div class="bg-white rounded-xl p-4">
-            <table class="w-full text-sm">
+        {{-- ===== HISTORY TRANSACTION TABLE ===== --}}
+        <div class="bg-white rounded-2xl shadow-sm p-4">
+
+            <table class="w-full text-sm text-gray-800">
                 <thead>
-                    <tr class="border-b">
-                        <th>Tanggal</th>
+                    <tr class="border-b text-left">
+                        <th class="py-2">Tanggal</th>
                         <th>Kategori</th>
                         <th>Deskripsi</th>
                         <th class="text-right">Nominal</th>
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach($dailyRows as $row)
-                        <tr class="border-b">
-                            <td>{{ $row->date->format('Y-m-d') }}</td>
-                            <td>{{ $row->category?->name ?? '-' }}</td>
-                            <td>{{ $row->title }}</td>
-                            <td class="text-right {{ $row->type === 'expense' ? 'text-red-600' : 'text-green-700' }}">
+
+                    @forelse($dailyRows as $row)
+                        <tr class="border-b last:border-0">
+                            <td class="py-2">
+                                {{ $row->date->format('Y-m-d') }}
+                            </td>
+
+                            <td>
+                                {{ $row->category?->name ?? '-' }}
+                            </td>
+
+                            <td>
+                                {{ $row->title }}
+                            </td>
+
+                            <td class="text-right font-medium
+                                {{ strtolower($row->type) === 'expense'
+                                    ? 'text-red-600'
+                                    : 'text-green-700' }}">
                                 Rp {{ number_format($row->amount,0,',','.') }}
                             </td>
                         </tr>
-                    @endforeach
+                    @empty
+                        <tr>
+                            <td colspan="4" class="py-6 text-center text-gray-400">
+                                Tidak ada transaksi pada tanggal ini
+                            </td>
+                        </tr>
+                    @endforelse
+
                 </tbody>
             </table>
+
         </div>
 
     </div>
+
 
 
 {{-- ================= CHART SCRIPT ================= --}}

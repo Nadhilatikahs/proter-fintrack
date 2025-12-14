@@ -1,25 +1,19 @@
-<x-guest-layout>
-    <div class="mb-4 text-sm text-gray-600">
-        {{ __('Forgot your password? No problem. Just let us know your email address and we will email you a password reset link that will allow you to choose a new one.') }}
-    </div>
+@extends('layouts.auth-fintrack')
+@section('title','Forgot Password')
 
-    <!-- Session Status -->
-    <x-auth-session-status class="mb-4" :status="session('status')" />
+@section('content')
+<div class="bg-[#CDF59C] rounded-3xl p-8 shadow-xl">
+    <h1 class="text-xl font-extrabold mb-4">Forgot Password</h1>
 
     <form method="POST" action="{{ route('password.email') }}">
         @csrf
+        <input type="email" name="email" required
+               placeholder="Enter Email Address"
+               class="w-full rounded-full px-4 py-3 mb-4">
 
-        <!-- Email Address -->
-        <div>
-            <x-input-label for="email" :value="__('Email')" />
-            <x-text-input id="email" class="block mt-1 w-full" type="email" name="email" :value="old('email')" required autofocus />
-            <x-input-error :messages="$errors->get('email')" class="mt-2" />
-        </div>
-
-        <div class="flex items-center justify-end mt-4">
-            <x-primary-button>
-                {{ __('Email Password Reset Link') }}
-            </x-primary-button>
-        </div>
+        <button class="w-full bg-[#7BAD3E] text-white py-3 rounded-full font-bold">
+            Next Step
+        </button>
     </form>
-</x-guest-layout>
+</div>
+@endsection

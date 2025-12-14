@@ -130,12 +130,8 @@ class Reports extends Page
         | DAILY (FIXED)
         |--------------------------------------------------------------------------
         */
-        $dailyDate = request('date')
-            ? Carbon::parse(request('date'))
-            : now();
-
-        $dailyFrom = $dailyDate->copy()->startOfDay();
-        $dailyTo   = $dailyDate->copy()->endOfDay();
+        $dailyFrom = $from->copy()->startOfDay();
+        $dailyTo   = $to->copy()->endOfDay();
 
         $dailyRows = Transaction::with('category')
             ->where('user_id', $userId)
@@ -148,8 +144,8 @@ class Reports extends Page
         | DAILY SUMMARY (REAL DATA)
         |--------------------------------------------------------------------------
         */
-        $dailyIncome  = (int) $dailyRows->where('type', 'income')->sum('amount');
-        $dailyExpense = (int) $dailyRows->where('type', 'expense')->sum('amount');
+        $dailyIncome  = array_sum($income);
+        $dailyExpense = array_sum($expense);
         $dailySelisih = $dailyIncome - $dailyExpense;
 
 
@@ -181,4 +177,44 @@ class Reports extends Page
             'to'
         );
     }
+    /*
+    |--------------------------------------------------------------------------
+    | EXPORT PDF
+    |--------------------------------------------------------------------------
+    */
+    public function exportDailyPdf()
+    {
+        $data = $this->getViewData();
+
+        $pdf = Pdf::loadView('pdf.daily-report', $data)
+            ->setPaper('A4', 'portrait');
+
+        return response()->streamDownload(
+            fn () => print($pdf->output()),
+            'daily-report-' . $data['date']->format('Y-m-d') . '.pdf'
+        );
+    }
+
+    public function exportCashflowPdf()
+    {
+        $pdf = Pdf::loadView('pdf.cashflow-report', $this->getViewData())
+            ->setPaper('A4', 'portrait');
+
+        return response()->streamDownload(
+            fn () => print($pdf->output()),
+            'cashflow-report-' . now()->format('Y-m-d') . '.pdf'
+        );
+    }
+
+    public function exportBudgetGoalPdf()
+    {
+        $pdf = Pdf::loadView('pdf.budget-goal-report', $this->getViewData())
+            ->setPaper('A4', 'portrait');
+
+        return response()->streamDownload(
+            fn () => print($pdf->output()),
+            'budget-goal-report-' . now()->format('Y-m-d') . '.pdf'
+        );
+    }
+
 }

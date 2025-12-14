@@ -112,4 +112,18 @@ Route::get(
     [Reports::class, 'exportDailyPdf']
 )->name('filament.admin.pages.reports.export-daily');
 
+Route::view('/intro-1', 'auth.intro-1')->name('intro.1');
+Route::view('/intro-2', 'auth.intro-2')->name('intro.2');
+Route::view('/auth-choice', 'auth.choice')->name('auth.choice');
+
+Route::get('/password-success', fn () => view('auth.password-success'))
+    ->name('password.success');
+
+Route::view('/password-success', 'auth.password-success')
+    ->name('password.success');
+
+Route::get('/', function () {
+    return view('auth.intro-1');
+});
+
 require __DIR__.'/auth.php';

@@ -1,3 +1,10 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+:root{
+  --ft-green: #7BAD3E;
+  --ft-dark:  #1F2937;
+  --ft-soft:  #CDF59C;
+  --ft-bg:    #EFF6D2;
+}
