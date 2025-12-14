@@ -18,7 +18,7 @@
         <div class="ft-sidebar-inner">
             {{-- Logo, nanti kamu ganti ke SVG sendiri --}}
             <div class="ft-logo">
-                <img src="{{ asset('fintrack/logo.svg') }}" alt="FintracR" class="ft-logo-img">
+                <img src="{{ asset('images/fintrack-logo.svg') }}" alt="Fintrack">
             </div>
 
             <div class="ft-menu-label">MENU</div>
@@ -100,6 +100,8 @@
         </main>
     </div>
 </div>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="{{ asset('js/fintrack/reports.js') }}"></script>
 
 @stack('scripts')
 </body>

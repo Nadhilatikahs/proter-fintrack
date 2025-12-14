@@ -4,9 +4,11 @@ namespace App\Filament\Pages;
 
 use App\Models\Category;
 use App\Models\Transaction;
+use App\Models\BudgetGoal;
 use Carbon\Carbon;
 use Filament\Pages\Page;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Http\Request;
 
 class TransactionsOverview extends Page
 {
@@ -15,13 +17,17 @@ class TransactionsOverview extends Page
     protected static ?string $navigationGroup = 'MENU';
     protected static ?int    $navigationSort  = 30;
 
-    // slug dan view Blade
     protected static ?string $slug = 'transactions-overview';
-    protected static string $view  = 'filament.pages.transactions-overview';
+    protected static string  $view = 'filament.pages.transactions-overview';
 
-    public ?int $deleteId = null;
-    public bool $showDeleteModal = false;
+    public ?int  $deleteId        = null;
+    public bool  $showDeleteModal = false;
 
+    /*
+    |--------------------------------------------------------------------------
+    | VIEW DATA
+    |--------------------------------------------------------------------------
+    */
     protected function getViewData(): array
     {
         $userId = Auth::id();
@@ -30,7 +36,7 @@ class TransactionsOverview extends Page
 
         $query = Transaction::query()
             ->where('user_id', $userId)
-            ->with('category');
+            ->with(['category', 'budgetGoal']);
 
         switch ($filter) {
             case 'day':
@@ -39,7 +45,7 @@ class TransactionsOverview extends Page
 
             case 'month':
                 $query->whereYear('date', $today->year)
-                    ->whereMonth('date', $today->month);
+                      ->whereMonth('date', $today->month);
                 break;
 
             case 'year':
@@ -47,15 +53,21 @@ class TransactionsOverview extends Page
                 break;
 
             case 'category':
-                $categoryId = request()->query('category_id');
-                if ($categoryId) {
+                if ($categoryId = request()->query('category_id')) {
                     $query->where('category_id', $categoryId);
+                }
+                break;
+
+            case 'budget': // drilldown dari Reports
+                if ($budgetId = request()->query('budget_goal_id')) {
+                    $query->where('type', 'expense')
+                          ->where('budget_goal_id', $budgetId);
                 }
                 break;
 
             case 'all':
             default:
-                // tidak ada filter
+                // no filter
                 break;
         }
 
@@ -67,34 +79,81 @@ class TransactionsOverview extends Page
             ->orderBy('name')
             ->get();
 
+        // 🔑 INI PENTING: dipakai dropdown expense
+        $budgets = BudgetGoal::where('user_id', $userId)
+            ->where('type', 'budget')
+            ->orderBy('name')
+            ->get();
+
         return [
             'transactions'     => $transactions,
             'categories'       => $categories,
+            'budgets'          => $budgets,
             'activeFilter'     => $filter,
             'activeCategoryId' => request()->query('category_id'),
+            'activeBudgetId'   => request()->query('budget_goal_id'),
         ];
     }
 
+    /*
+    |--------------------------------------------------------------------------
+    | STORE TRANSACTION (INI KUNCI UTAMA)
+    |--------------------------------------------------------------------------
+    */
+    public function store(Request $request): void
+    {
+        $request->validate([
+            'type' => ['required', 'in:income,expense'],
+            'amount' => ['required', 'numeric', 'min:1'],
+            'date' => ['required', 'date'],
+            'category_id' => ['nullable', 'exists:categories,id'],
+
+            // 🔑 WAJIB PAKAI BUDGET SAAT EXPENSE
+            'budget_goal_id' => [
+                'required_if:type,expense',
+                'nullable',
+                'exists:budget_goals,id',
+            ],
+        ]);
+
+        Transaction::create([
+            'user_id'        => Auth::id(),
+            'type'           => $request->type,
+            'amount'         => $request->amount,
+            'date'           => $request->date,
+            'category_id'    => $request->category_id,
+            'budget_goal_id' => $request->type === 'expense'
+                ? $request->budget_goal_id
+                : null,
+            'title'          => $request->title ?? null,
+            'description'    => $request->description ?? null,
+        ]);
+
+        // refresh page
+        $this->dispatch('$refresh');
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | DELETE
+    |--------------------------------------------------------------------------
+    */
     public function confirmDelete(int $id): void
     {
-        $this->deleteId       = $id;
+        $this->deleteId = $id;
         $this->showDeleteModal = true;
     }
 
     public function deleteConfirmed(): void
     {
-        if (! $this->deleteId) {
-            $this->showDeleteModal = false;
-            return;
-        }
-
-        Transaction::where('user_id', Auth::id())
-            ->where('id', $this->deleteId)
+        Transaction::where('id', $this->deleteId)
+            ->where('user_id', Auth::id())
             ->delete();
 
-        $this->deleteId        = null;
+        $this->deleteId = null;
         $this->showDeleteModal = false;
 
         $this->dispatch('$refresh');
     }
+
 }

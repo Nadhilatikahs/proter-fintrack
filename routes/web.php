@@ -55,5 +55,61 @@ Route::get('/admin/budget-goals-alias', function () {
 
 Route::middleware(['auth'])
     ->get('/admin/reports/export', [ReportExportController::class, 'export'])
-    ->name('admin.reports.export');
+->name('admin.reports.export');
+
+Route::middleware(['auth'])
+    ->prefix('admin')
+    ->group(function () {
+        Route::get('/reports/export/{type}', [ReportExportController::class, 'export'])
+            ->name('reports.export');
+    });
+
+// routes/web.php
+Route::get('/reports', [ReportController::class, 'index'])
+    ->middleware('auth')
+    ->name('reports');
+
+use App\Http\Controllers\ReportController;
+
+Route::middleware(['auth'])->group(function () {
+    Route::get('/reports', [ReportController::class, 'index'])->name('reports');
+});
+
+Route::get('/reports/goal/pdf', [ReportController::class, 'exportGoalPdf'])
+    ->middleware('auth')
+    ->name('reports.goal.pdf');
+
+Route::get('/reports/pdf/full', [ReportController::class, 'exportFullPdf'])
+    ->middleware('auth')
+    ->name('reports.pdf.full');
+
+use App\Filament\Pages\TransactionsOverview;
+
+Route::get('/admin/transactions/budget/{budget}', function (\App\Models\BudgetGoal $budget) {
+    abort_if($budget->type !== 'budget', 404);
+
+    return redirect()->route('filament.admin.pages.transactions-overview', [
+        'filter' => 'budget',
+        'budget_goal_id' => $budget->id,
+    ]);
+})->middleware(['auth']);
+
+use App\Filament\Pages\Reports;
+
+Route::get(
+    '/admin/reports/export-cashflow',
+    [Reports::class, 'exportCashflowPdf']
+)->name('filament.admin.pages.reports.export-cashflow');
+
+Route::get(
+    '/admin/reports/export-budget-goal',
+    [Reports::class, 'exportBudgetGoalPdf']
+)->name('filament.admin.pages.reports.export-budget-goal');
+
+
+Route::get(
+    '/admin/reports/export-daily',
+    [Reports::class, 'exportDailyPdf']
+)->name('filament.admin.pages.reports.export-daily');
+
 require __DIR__.'/auth.php';

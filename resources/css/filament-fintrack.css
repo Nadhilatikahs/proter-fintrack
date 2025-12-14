@@ -1984,3 +1984,83 @@ body {
     text-align: center;
     padding: 0.7rem;
 }
+/* REPORTS - DAILY */
+.ft-report-toolbar {
+  margin-top: 0.75rem;
+}
+
+.ft-report-filter {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: end;
+}
+
+.ft-filter-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.ft-report-summary-grid {
+  margin-top: 1rem;
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+@media (max-width: 1024px) {
+  .ft-report-summary-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 640px) {
+  .ft-report-summary-grid { grid-template-columns: 1fr; }
+}
+
+.ft-chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+.ft-chip {
+  background: #CDF59C;
+  color: #1F2937;
+  border: 1px solid rgba(31,41,55,.15);
+  padding: 0.35rem 0.7rem;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.ft-table-wrap { overflow-x: auto; }
+
+.ft-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: transparent;
+}
+.ft-table th {
+  text-align: left;
+  font-size: 0.85rem;
+  color: #1F2937;
+  padding: 0.75rem 0.6rem;
+  border-bottom: 1px solid rgba(31,41,55,.12);
+}
+.ft-table td {
+  padding: 0.75rem 0.6rem;
+  border-bottom: 1px solid rgba(31,41,55,.08);
+  color: #1F2937;
+}
+
+.ft-table tr.is-missing td {
+  background: rgba(201, 32, 32, 0.06);
+}
+
+.ft-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+.ft-pill-success { background: rgba(123,173,62,.18); color:#1F2937; }
+.ft-pill-danger  { background: rgba(201,32,32,.18); color:#1F2937; }

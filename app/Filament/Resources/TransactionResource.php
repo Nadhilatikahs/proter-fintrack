@@ -17,39 +17,38 @@ use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
 use App\Rules\MaxWords;
 
-
 class TransactionResource extends Resource
 {
     protected static ?string $model = Transaction::class;
 
-    // NAVIGASI KITA MATIKAN, KARENA PAKAI PAGE CUSTOM
     protected static bool $shouldRegisterNavigation = false;
 
     protected static ?string $navigationLabel = 'Transactions';
     protected static ?string $navigationGroup = 'MENU';
-    protected static ?string $navigationIcon = 'heroicon-o-arrow-path';
-    protected static ?int $navigationSort = 30;
+    protected static ?string $navigationIcon  = 'heroicon-o-arrow-path';
+    protected static ?int    $navigationSort  = 30;
 
+    /* =====================================================
+     | FORM
+     ===================================================== */
     public static function form(Form $form): Form
     {
         $userId = Auth::id();
 
         return $form
             ->schema([
-                Forms\Components\Section::make('') // kartu hijau besar
+                Forms\Components\Section::make()
                     ->schema([
-                        // ROW 1 : Date & Category
+
+                        /* ROW 1 : DATE & CATEGORY */
                         Forms\Components\Grid::make(2)
                             ->schema([
                                 Forms\Components\DatePicker::make('date')
                                     ->label('Date')
                                     ->default(now())
                                     ->required()
-                                    ->displayFormat('M d, Y')
-                                    ->native(false) // paksa pakai flatpickr
-                                    ->extraAttributes([
-                                        'class' => 'ft-input',
-                                    ]),
+                                    ->native(false)
+                                    ->extraAttributes(['class' => 'ft-input']),
 
                                 Forms\Components\Select::make('category_id')
                                     ->label('Category')
@@ -61,12 +60,10 @@ class TransactionResource extends Resource
                                     ->required()
                                     ->searchable()
                                     ->preload()
-                                    ->extraAttributes([
-                                        'class' => 'ft-input ft-select',
-                                    ]),
+                                    ->extraAttributes(['class' => 'ft-input ft-select']),
                             ]),
 
-                        // ROW 2 : Type & Name
+                        /* ROW 2 : TYPE & TITLE */
                         Forms\Components\Grid::make(2)
                             ->schema([
                                 Forms\Components\Select::make('type')
@@ -76,22 +73,17 @@ class TransactionResource extends Resource
                                         'expense' => 'Expense',
                                     ])
                                     ->required()
-                                    ->default('expense')
                                     ->live()
-                                    ->extraAttributes([
-                                        'class' => 'ft-input ft-select',
-                                    ]),
+                                    ->extraAttributes(['class' => 'ft-input ft-select']),
 
                                 Forms\Components\TextInput::make('title')
                                     ->label('Name')
                                     ->required()
                                     ->maxLength(255)
-                                    ->extraAttributes([
-                                        'class' => 'ft-input',
-                                    ]),
+                                    ->extraAttributes(['class' => 'ft-input']),
                             ]),
 
-                        // ROW 3 : Amount & Goals (optional, hanya untuk income)
+                        /* ROW 3 : AMOUNT & BUDGET / GOAL */
                         Forms\Components\Grid::make(2)
                             ->schema([
                                 Forms\Components\TextInput::make('amount')
@@ -99,96 +91,65 @@ class TransactionResource extends Resource
                                     ->numeric()
                                     ->prefix('Rp')
                                     ->required()
-                                    ->extraAttributes([
-                                        'class' => 'ft-input',
-                                    ]),
+                                    ->extraAttributes(['class' => 'ft-input']),
 
+                                /* 🔴 BUDGET (WAJIB JIKA EXPENSE) */
                                 Forms\Components\Select::make('budget_goal_id')
-                                    ->label('Related Goal (optional)')
-                                    ->options(
+                                    ->label(fn (Get $get) =>
+                                        $get('type') === 'expense'
+                                            ? 'Budget *'
+                                            : 'Goal (optional)'
+                                    )
+                                    ->options(fn (Get $get) =>
                                         BudgetGoal::where('user_id', $userId)
-                                            ->where('type', 'goal')
+                                            ->where('type', $get('type') === 'expense' ? 'budget' : 'goal')
                                             ->orderBy('name')
                                             ->pluck('name', 'id')
                                     )
-                                    ->visible(fn (Get $get) => $get('type') === 'income')
+                                    ->required(fn (Get $get) => $get('type') === 'expense')
                                     ->searchable()
                                     ->preload()
-                                    ->nullable()
-                                    ->extraAttributes([
-                                        'class' => 'ft-input ft-select',
-                                    ]),
+                                    ->helperText(fn (Get $get) =>
+                                        $get('type') === 'expense'
+                                            ? 'Wajib dipilih untuk transaksi pengeluaran'
+                                            : 'Opsional untuk pemasukan'
+                                    )
+                                    ->extraAttributes(['class' => 'ft-input ft-select']),
                             ]),
 
-                        // ROW 4 : Description (full width + jarak)
+                        /* ROW 4 : DESCRIPTION */
                         Forms\Components\Textarea::make('description')
                             ->label('Description')
                             ->rows(3)
                             ->nullable()
                             ->rule(new MaxWords(50))
                             ->columnSpanFull()
-                            ->extraAttributes([
-                                'class' => 'ft-input mt-3',
-                            ]),
+                            ->extraAttributes(['class' => 'ft-input mt-3']),
                     ])
-                    ->extraAttributes([
-                        'class' => 'ft-card-form',
-                    ]),
+                    ->extraAttributes(['class' => 'ft-card-form']),
             ]);
     }
 
-    // Table masih kita biarkan, tapi praktis tidak dipakai lagi di UI
+    /* =====================================================
+     | TABLE (OPSIONAL)
+     ===================================================== */
     public static function table(Table $table): Table
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('date')
-                    ->label('Date')
-                    ->date('d F Y')
-                    ->sortable(),
-
-                Tables\Columns\TextColumn::make('title')
-                    ->label('Name')
-                    ->searchable()
-                    ->wrap(),
-
-                Tables\Columns\TextColumn::make('category.name')
-                    ->label('Category')
-                    ->sortable(),
-
-                Tables\Columns\TextColumn::make('amount')
-                    ->label('Amount')
-                    ->money('idr', true)
-                    ->sortable(),
-
+                Tables\Columns\TextColumn::make('date')->date('d F Y')->sortable(),
+                Tables\Columns\TextColumn::make('title')->searchable()->wrap(),
+                Tables\Columns\TextColumn::make('category.name')->label('Category'),
+                Tables\Columns\TextColumn::make('amount')->money('idr', true),
                 Tables\Columns\TextColumn::make('type')
-                    ->label('Type')
                     ->badge()
-                    ->formatStateUsing(fn (string $state) => ucfirst($state))
                     ->colors([
                         'success' => 'income',
                         'danger'  => 'expense',
                     ]),
-            ])
-            ->filters([
-                Tables\Filters\Filter::make('today')
-                    ->label('Today')
-                    ->query(fn (Builder $query) =>
-                        $query->whereDate('date', Carbon::today())
-                    ),
-
-                Tables\Filters\Filter::make('this_month')
-                    ->label('This month')
-                    ->query(fn (Builder $query) =>
-                        $query->whereYear('date', now()->year)
-                            ->whereMonth('date', now()->month)
-                    ),
-
-                Tables\Filters\Filter::make('this_year')
-                    ->label('This year')
-                    ->query(fn (Builder $query) =>
-                        $query->whereYear('date', now()->year)
-                    ),
+                Tables\Columns\TextColumn::make('budgetGoal.name')
+                    ->label('Budget / Goal')
+                    ->placeholder('-'),
             ])
             ->defaultSort('date', 'desc');
     }

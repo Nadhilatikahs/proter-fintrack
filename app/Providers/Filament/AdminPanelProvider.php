@@ -4,6 +4,8 @@ namespace App\Providers\Filament;
 
 use App\Filament\Pages\Dashboard as CustomDashboard;
 use App\Filament\Pages\BudgetGoals;
+use App\Filament\Pages\TransactionsOverview;
+use App\Filament\Pages\CategoriesOverview;
 use App\Filament\Widgets\BudgetStatusWidget;
 use App\Filament\Widgets\MonthlyFinanceOverview;
 use Filament\Http\Middleware\Authenticate;
@@ -20,8 +22,6 @@ use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
-use App\Filament\Pages\TransactionsOverview;
-use App\Filament\Pages\CategoriesOverview;
 
 class AdminPanelProvider extends PanelProvider
 {
@@ -32,18 +32,25 @@ class AdminPanelProvider extends PanelProvider
             ->id('admin')
             ->path('admin')
             ->login()
+
+            // 🎨 Theme via Vite (BENAR untuk Filament v3)
+            ->viteTheme('resources/css/filament-fintrack.css')
+
             ->colors([
                 'primary' => Color::Amber,
             ])
-            ->viteTheme('resources/css/filament-fintrack.css')
 
-            // Resources (BudgetGoalResource, CategoryResource, TransactionResource, dll)
+            // ========================
+            // RESOURCES
+            // ========================
             ->discoverResources(
                 in: app_path('Filament/Resources'),
                 for: 'App\\Filament\\Resources',
             )
 
-            // Pages (Dashboard custom, dsb — TIDAK termasuk BudgetGoals lagi)
+            // ========================
+            // PAGES
+            // ========================
             ->discoverPages(
                 in: app_path('Filament/Pages'),
                 for: 'App\\Filament\\Pages',
@@ -55,7 +62,9 @@ class AdminPanelProvider extends PanelProvider
                 CategoriesOverview::class,
             ])
 
-            // Widgets
+            // ========================
+            // WIDGETS
+            // ========================
             ->discoverWidgets(
                 in: app_path('Filament/Widgets'),
                 for: 'App\\Filament\\Widgets',
@@ -65,8 +74,9 @@ class AdminPanelProvider extends PanelProvider
                 BudgetStatusWidget::class,
             ])
 
-            ->databaseNotifications()
-
+            // ========================
+            // MIDDLEWARE
+            // ========================
             ->middleware([
                 EncryptCookies::class,
                 AddQueuedCookiesToResponse::class,
@@ -78,13 +88,17 @@ class AdminPanelProvider extends PanelProvider
                 DisableBladeIconComponents::class,
                 DispatchServingFilamentEvent::class,
             ])
+
             ->authMiddleware([
                 Authenticate::class,
             ])
 
+            // ========================
+            // NAVIGATION
+            // ========================
             ->navigationItems([
                 NavigationItem::make('Leave')
-                    ->group('Profile')
+                    ->group('MENU')
                     ->icon('heroicon-o-arrow-left-on-rectangle')
                     ->url('/logout')
                     ->sort(99),

@@ -17,7 +17,8 @@ class BudgetGoal extends Model
         'user_id',
         'name',
         'description',
-        'type',                  // 'budget' | 'goal'
+        'type',
+        'category_id',                  // 'budget' | 'goal'
         'period_type',
         'target_amount',
         'target_date',
@@ -36,7 +37,7 @@ class BudgetGoal extends Model
 
     public function transactions(): HasMany
     {
-        return $this->hasMany(Transaction::class);
+        return $this->hasMany(Transaction::class, 'budget_goal_id');
     }
 
     /** Scope cepat untuk ambil semua budget */
@@ -50,4 +51,9 @@ class BudgetGoal extends Model
     {
         return $query->where('type', 'goal');
     }
+    public function category()
+    {
+        return $this->belongsTo(Category::class);
+    }
+
 }

@@ -1,9 +1,14 @@
 <x-filament-panels::page>
     <div class="ft-trans-layout">
 
-        {{-- HEADER + BUTTON --}}
+        {{-- HEADER --}}
         <div class="ft-page-header-row">
-            <h1 class="ft-page-title">Transactions</h1>
+            <div>
+                <h1 class="ft-page-title">Transactions</h1>
+                <p class="ft-page-subtitle">
+                    Kelola limit dan impian finansial kamu.
+                </p>
+            </div>
 
             <a href="{{ route('filament.admin.resources.transactions.create') }}"
                class="fin-btn-outline fin-btn-big">
@@ -11,7 +16,7 @@
             </a>
         </div>
 
-        {{-- FILTER PILLS --}}
+        {{-- FILTER --}}
         @php
             $filters = [
                 'all'      => 'All',
@@ -63,21 +68,15 @@
             @forelse ($transactions as $tx)
                 <article class="ft-trans-row">
                     <div class="ft-col ft-col-date">
-                        {{ \Carbon\Carbon::parse($tx->date)->format('d F Y') }}
+                        {{ $tx->date->format('d F Y') }}
                     </div>
 
                     <div class="ft-col ft-col-category">
-                        @if ($tx->category)
-                            <span class="ft-pill ft-pill-category">
-                                {{ $tx->category->name }}
-                            </span>
-                        @else
-                            <span class="ft-pill ft-pill-muted">-</span>
-                        @endif
+                        {{ $tx->category?->name ?? '-' }}
                     </div>
 
                     <div class="ft-col ft-col-amount">
-                        Rp {{ number_format($tx->amount ?? 0, 0, ',', '.') }}
+                        Rp {{ number_format($tx->amount, 0, ',', '.') }}
                     </div>
 
                     <div class="ft-col ft-col-name">
@@ -85,11 +84,9 @@
                     </div>
 
                     <div class="ft-col ft-col-type">
-                        @if ($tx->type === 'income')
-                            <span class="ft-pill ft-pill-income">Income</span>
-                        @else
-                            <span class="ft-pill ft-pill-expense">Expense</span>
-                        @endif
+                        <span class="ft-pill ft-pill-{{ $tx->type }}">
+                            {{ ucfirst($tx->type) }}
+                        </span>
                     </div>
 
                     <div class="ft-col ft-col-actions">
@@ -97,49 +94,20 @@
                            class="fin-btn-dark fin-btn-sm">
                             Edit
                         </a>
-                        <button type="button"
-                                class="fin-btn-red fin-btn-sm"
-                                wire:click="confirmDelete({{ $tx->id }})">
+                        <button
+                            type="button"
+                            class="fin-btn-red fin-btn-sm"
+                            wire:click="confirmDelete({{ $tx->id }})">
                             Delete
                         </button>
+
                     </div>
                 </article>
             @empty
                 <div class="ft-trans-empty">
-                    No transactions yet. Click <strong>+ Input Transaction</strong> to add one.
+                    No transactions yet.
                 </div>
             @endforelse
         </section>
-
-        {{-- MODAL DELETE --}}
-        @if ($showDeleteModal)
-            <div class="ft-modal-backdrop">
-                <div class="ft-modal">
-                    <div class="ft-modal-title">
-                        Delete transaction
-                    </div>
-                    <div class="ft-modal-text">
-                        Are you sure you want to delete this transaction?
-                        <br>
-                        <span class="text-red-600 font-semibold">
-                            This action cannot be undone.
-                        </span>
-                    </div>
-                    <div class="ft-modal-actions">
-                        <button type="button"
-                                class="fin-btn-dark"
-                                wire:click="$set('showDeleteModal', false)">
-                            Cancel
-                        </button>
-                        <button type="button"
-                                class="fin-btn-red"
-                                wire:click="deleteConfirmed">
-                            Delete
-                        </button>
-                    </div>
-                </div>
-            </div>
-        @endif
-
     </div>
 </x-filament-panels::page>
