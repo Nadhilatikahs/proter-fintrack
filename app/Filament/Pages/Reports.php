@@ -3,6 +3,7 @@
 namespace App\Filament\Pages;
 
 use Filament\Pages\Page;
+use Filament\Actions\Action;
 use App\Models\Transaction;
 use App\Models\BudgetGoal;
 use Illuminate\Support\Facades\DB;
@@ -11,12 +12,34 @@ use Carbon\Carbon;
 
 class Reports extends Page
 {
-    protected static ?string $navigationIcon  = 'heroicon-o-chart-bar';
+    protected static ?string $navigationIcon = 'heroicon-o-chart-bar';
     protected static ?string $navigationLabel = 'Reports';
     protected static ?string $navigationGroup = 'MENU';
-    protected static ?int    $navigationSort  = 40;
+    protected static ?int $navigationSort = 40;
 
     protected static string $view = 'filament.pages.reports';
+
+    /**
+     * Register custom routes for export actions
+     */
+    public static function getRoutes(): \Closure
+    {
+        return function () {
+            $slug = static::getSlug();
+
+            \Illuminate\Support\Facades\Route::get("/{$slug}/export-cashflow", function () {
+                return app(static::class)->exportCashflowPdf();
+            })->name("export-cashflow");
+
+            \Illuminate\Support\Facades\Route::get("/{$slug}/export-budget-goal", function () {
+                return app(static::class)->exportBudgetGoalPdf();
+            })->name("export-budget-goal");
+
+            \Illuminate\Support\Facades\Route::get("/{$slug}/export-daily", function () {
+                return app(static::class)->exportDailyPdf();
+            })->name("export-daily");
+        };
+    }
 
     public function getViewData(): array
     {
@@ -50,10 +73,10 @@ class Reports extends Page
         |--------------------------------------------------------------------------
         */
         $cashflowRaw = Transaction::select(
-                DB::raw('DATE(date) as day'),
-                DB::raw("SUM(CASE WHEN type='income' THEN amount ELSE 0 END) as income"),
-                DB::raw("SUM(CASE WHEN type='expense' THEN amount ELSE 0 END) as expense")
-            )
+            DB::raw('DATE(date) as day'),
+            DB::raw("SUM(CASE WHEN type='income' THEN amount ELSE 0 END) as income"),
+            DB::raw("SUM(CASE WHEN type='expense' THEN amount ELSE 0 END) as expense")
+        )
             ->where('user_id', $userId)
             ->whereBetween('date', [$from, $to])
             ->groupBy(DB::raw('DATE(date)'))
@@ -69,14 +92,14 @@ class Reports extends Page
         foreach ($period as $d) {
             $row = $cashflowRaw->firstWhere('day', $d->format('Y-m-d'));
 
-            $labels[]  = $d->format('d M');
-            $income[]  = (int) ($row->income ?? 0);
+            $labels[] = $d->format('d M');
+            $income[] = (int) ($row->income ?? 0);
             $expense[] = (int) ($row->expense ?? 0);
         }
 
-        $totalIncome  = array_sum($income);
+        $totalIncome = array_sum($income);
         $totalExpense = array_sum($expense);
-        $selisih      = $totalIncome - $totalExpense;
+        $selisih = $totalIncome - $totalExpense;
 
         /*
         |--------------------------------------------------------------------------
@@ -86,14 +109,14 @@ class Reports extends Page
         $budgets = BudgetGoal::where('user_id', $userId)
             ->where('type', 'budget')
             ->withSum(
-                ['transactions as spent' => fn ($q) => $q->where('type', 'expense')],
+                ['transactions as spent' => fn($q) => $q->where('type', 'expense')],
                 'amount'
             )
             ->get()
             ->map(function ($b) {
-                $b->amount  = (int) $b->target_amount;
-                $b->spent   = (int) ($b->spent ?? 0);
-                $b->remain  = max($b->amount - $b->spent, 0);
+                $b->amount = (int) $b->target_amount;
+                $b->spent = (int) ($b->spent ?? 0);
+                $b->remain = max($b->amount - $b->spent, 0);
                 $b->percent = $b->amount > 0
                     ? min(100, round(($b->spent / $b->amount) * 100))
                     : 0;
@@ -101,7 +124,7 @@ class Reports extends Page
             });
 
         $totalBudget = $budgets->sum('amount');
-        $totalSpent  = $budgets->sum('spent');
+        $totalSpent = $budgets->sum('spent');
         $totalRemain = max($totalBudget - $totalSpent, 0);
 
         /*
@@ -112,13 +135,13 @@ class Reports extends Page
         $goals = BudgetGoal::where('user_id', $userId)
             ->where('type', 'goal')
             ->withSum(
-                ['transactions as saved' => fn ($q) => $q->where('type', 'income')],
+                ['transactions as saved' => fn($q) => $q->where('type', 'income')],
                 'amount'
             )
             ->get()
             ->map(function ($g) {
-                $g->target  = (int) $g->target_amount;
-                $g->saved   = (int) ($g->saved ?? 0);
+                $g->target = (int) $g->target_amount;
+                $g->saved = (int) ($g->saved ?? 0);
                 $g->percent = $g->target > 0
                     ? min(100, round(($g->saved / $g->target) * 100))
                     : 0;
@@ -131,7 +154,7 @@ class Reports extends Page
         |--------------------------------------------------------------------------
         */
         $dailyFrom = $from->copy()->startOfDay();
-        $dailyTo   = $to->copy()->endOfDay();
+        $dailyTo = $to->copy()->endOfDay();
 
         $dailyRows = Transaction::with('category')
             ->where('user_id', $userId)
@@ -144,7 +167,7 @@ class Reports extends Page
         | DAILY SUMMARY (REAL DATA)
         |--------------------------------------------------------------------------
         */
-        $dailyIncome  = array_sum($income);
+        $dailyIncome = array_sum($income);
         $dailyExpense = array_sum($expense);
         $dailySelisih = $dailyIncome - $dailyExpense;
 
@@ -190,7 +213,7 @@ class Reports extends Page
             ->setPaper('A4', 'portrait');
 
         return response()->streamDownload(
-            fn () => print($pdf->output()),
+            fn() => print ($pdf->output()),
             'daily-report-' . $data['date']->format('Y-m-d') . '.pdf'
         );
     }
@@ -201,7 +224,7 @@ class Reports extends Page
             ->setPaper('A4', 'portrait');
 
         return response()->streamDownload(
-            fn () => print($pdf->output()),
+            fn() => print ($pdf->output()),
             'cashflow-report-' . now()->format('Y-m-d') . '.pdf'
         );
     }
@@ -212,7 +235,7 @@ class Reports extends Page
             ->setPaper('A4', 'portrait');
 
         return response()->streamDownload(
-            fn () => print($pdf->output()),
+            fn() => print ($pdf->output()),
             'budget-goal-report-' . now()->format('Y-m-d') . '.pdf'
         );
     }

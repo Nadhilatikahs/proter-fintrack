@@ -6,9 +6,8 @@ export default defineConfig({
         laravel({
             input: [
                 'resources/css/app.css',
-                'resources/js/app.js',
-                // theme khusus Filament
                 'resources/css/filament-fintrack.css',
+                'resources/js/app.js',
             ],
             refresh: true,
         }),

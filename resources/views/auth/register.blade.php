@@ -1,77 +1,43 @@
-@extends('layouts.auth-fintrack')
-@section('title','Register - FinTrack')
+@extends('layouts.auth-2col')
+@section('title','Register | FinTrack')
 
-@section('content')
-<div class="w-full max-w-md">
+@section('card')
+<h2 class="text-2xl font-bold text-[#1F2937] mb-6">
+    Create Account
+</h2>
 
-    <div class="rounded-3xl bg-[var(--ft-soft)]/60 border border-black/5 shadow-xl overflow-hidden">
+<form method="POST" action="{{ route('register') }}" class="space-y-4">
+    @csrf
 
-        <div class="px-10 pt-10 pb-6 bg-[var(--ft-bg)]">
-            <div class="flex justify-center">
-                <img src="{{ asset('images/fintrack-logo.svg') }}" class="h-10" alt="FinTrack">
-            </div>
-            <h1 class="text-center text-2xl font-extrabold mt-6">Create Account</h1>
-        </div>
-
-        <div class="px-8 pb-8 pt-6">
-            <form method="POST" action="{{ route('register') }}" class="space-y-3">
-                @csrf
-
-                {{-- Full Name --}}
-                <div>
-                    <label class="text-sm font-semibold">Full Name</label>
-                    <input name="name" type="text" value="{{ old('name') }}" required
-                        class="mt-2 w-full rounded-full px-4 py-3 bg-white/70 border border-black/10
-                               focus:outline-none focus:ring-2 focus:ring-[var(--ft-green)]">
-                    @error('name') <div class="text-sm text-red-600 mt-2">{{ $message }}</div> @enderror
-                </div>
-
-                {{-- Email --}}
-                <div>
-                    <label class="text-sm font-semibold">Email</label>
-                    <input name="email" type="email" value="{{ old('email') }}" required
-                        class="mt-2 w-full rounded-full px-4 py-3 bg-white/70 border border-black/10
-                               focus:outline-none focus:ring-2 focus:ring-[var(--ft-green)]">
-                    @error('email') <div class="text-sm text-red-600 mt-2">{{ $message }}</div> @enderror
-                </div>
-
-                {{-- Mobile (opsional UI, kalau belum ada di DB jangan dipaksa) --}}
-                <div>
-                    <label class="text-sm font-semibold">Mobile Number (optional)</label>
-                    <input name="phone" type="text" value="{{ old('phone') }}"
-                        class="mt-2 w-full rounded-full px-4 py-3 bg-white/70 border border-black/10
-                               focus:outline-none focus:ring-2 focus:ring-[var(--ft-green)]">
-                </div>
-
-                {{-- Password --}}
-                <div>
-                    <label class="text-sm font-semibold">Password</label>
-                    <input name="password" type="password" required
-                        class="mt-2 w-full rounded-full px-4 py-3 bg-white/70 border border-black/10
-                               focus:outline-none focus:ring-2 focus:ring-[var(--ft-green)]">
-                    @error('password') <div class="text-sm text-red-600 mt-2">{{ $message }}</div> @enderror
-                </div>
-
-                {{-- Confirm --}}
-                <div>
-                    <label class="text-sm font-semibold">Confirm Password</label>
-                    <input name="password_confirmation" type="password" required
-                        class="mt-2 w-full rounded-full px-4 py-3 bg-white/70 border border-black/10
-                               focus:outline-none focus:ring-2 focus:ring-[var(--ft-green)]">
-                </div>
-
-                <button type="submit"
-                    class="w-full mt-2 rounded-full py-3 font-bold text-white bg-[var(--ft-green)] hover:opacity-90 transition">
-                    Sign Up
-                </button>
-
-                <div class="text-center text-xs opacity-70 mt-2">
-                    Already have an account?
-                    <a href="{{ route('login') }}" class="font-bold underline underline-offset-4">Log In</a>
-                </div>
-            </form>
-        </div>
+    <div>
+        <label class="text-sm font-medium">Full Name</label>
+        <input name="name" required class="mt-1 w-full rounded-lg border px-4 py-3">
     </div>
 
-</div>
+    <div>
+        <label class="text-sm font-medium">Email</label>
+        <input name="email" type="email" required class="mt-1 w-full rounded-lg border px-4 py-3">
+    </div>
+
+    <div>
+        <label class="text-sm font-medium">Password</label>
+        <input name="password" type="password" required class="mt-1 w-full rounded-lg border px-4 py-3">
+    </div>
+
+    <div>
+        <label class="text-sm font-medium">Confirm Password</label>
+        <input name="password_confirmation" type="password" required class="mt-1 w-full rounded-lg border px-4 py-3">
+    </div>
+
+    <button class="w-full bg-[#7BAD3E] text-white py-3 rounded-lg font-semibold">
+        Sign Up
+    </button>
+</form>
+
+<p class="mt-6 text-center text-sm">
+    Sudah punya akun?
+    <a href="{{ route('login') }}" class="text-[#7BAD3E] font-semibold hover:underline">
+        Log In
+    </a>
+</p>
 @endsection

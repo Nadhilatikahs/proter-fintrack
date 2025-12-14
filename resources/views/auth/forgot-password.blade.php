@@ -1,19 +1,19 @@
-@extends('layouts.auth-fintrack')
+@extends('layouts.auth-2col')
 @section('title','Forgot Password')
 
-@section('content')
-<div class="bg-[#CDF59C] rounded-3xl p-8 shadow-xl">
-    <h1 class="text-xl font-extrabold mb-4">Forgot Password</h1>
+@section('card')
+<h2 class="text-2xl font-bold mb-4">Forgot Password</h2>
 
-    <form method="POST" action="{{ route('password.email') }}">
-        @csrf
+<form method="POST" action="{{ route('password.email') }}" class="space-y-4">
+    @csrf
+    <div>
+        <label class="text-sm font-medium">Email</label>
         <input type="email" name="email" required
-               placeholder="Enter Email Address"
-               class="w-full rounded-full px-4 py-3 mb-4">
+               class="mt-1 w-full rounded-lg border px-4 py-3">
+    </div>
 
-        <button class="w-full bg-[#7BAD3E] text-white py-3 rounded-full font-bold">
-            Next Step
-        </button>
-    </form>
-</div>
+    <button class="w-full bg-[#7BAD3E] text-white py-3 rounded-lg font-semibold">
+        Next Step
+    </button>
+</form>
 @endsection

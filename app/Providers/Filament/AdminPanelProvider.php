@@ -6,6 +6,7 @@ use App\Filament\Pages\Dashboard as CustomDashboard;
 use App\Filament\Pages\BudgetGoals;
 use App\Filament\Pages\TransactionsOverview;
 use App\Filament\Pages\CategoriesOverview;
+use App\Filament\Pages\Reports;
 use App\Filament\Widgets\BudgetStatusWidget;
 use App\Filament\Widgets\MonthlyFinanceOverview;
 use Filament\Http\Middleware\Authenticate;
@@ -16,6 +17,8 @@ use Filament\Navigation\NavigationItem;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
+use Filament\View\PanelsRenderHook;
+use Illuminate\Support\Facades\Blade;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
@@ -31,10 +34,17 @@ class AdminPanelProvider extends PanelProvider
             ->default()
             ->id('admin')
             ->path('admin')
-            ->login()
+            ->login(\App\Filament\Pages\Auth\Login::class)
+
+            // 🎨 Logo
+            ->brandLogo(asset('images/fintrack-logo.svg'))
+            ->brandLogoHeight('2.5rem')
 
             // 🎨 Theme via Vite (BENAR untuk Filament v3)
             ->viteTheme('resources/css/filament-fintrack.css')
+
+            // 🌙 Enable Dark Mode
+            ->darkMode()
 
             ->colors([
                 'primary' => Color::Amber,
@@ -60,6 +70,7 @@ class AdminPanelProvider extends PanelProvider
                 BudgetGoals::class,
                 TransactionsOverview::class,
                 CategoriesOverview::class,
+                Reports::class,
             ])
 
             // ========================
@@ -94,14 +105,26 @@ class AdminPanelProvider extends PanelProvider
             ])
 
             // ========================
-            // NAVIGATION
+            // NAVIGATION (Logout is available in user menu)
             // ========================
             ->navigationItems([
-                NavigationItem::make('Leave')
-                    ->group('MENU')
-                    ->icon('heroicon-o-arrow-left-on-rectangle')
-                    ->url('/logout')
-                    ->sort(99),
-            ]);
+                // Leave/Logout is handled by Filament's user menu
+            ])
+
+            // ========================
+            // LOGO in Top Navbar
+            // ========================
+            ->renderHook(
+                PanelsRenderHook::TOPBAR_START,
+                fn(): string => Blade::render('@include("filament.components.topbar-logo")')
+            )
+
+            // ========================
+            // NOTIFICATION BELL in Header
+            // ========================
+            ->renderHook(
+                PanelsRenderHook::USER_MENU_BEFORE,
+                fn(): string => Blade::render('@include("filament.components.notification-bell")')
+            );
     }
 }

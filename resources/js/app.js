@@ -1,4 +1,5 @@
 import './bootstrap';
+import './sidebar-collapse';
 
 import Alpine from 'alpinejs';
 

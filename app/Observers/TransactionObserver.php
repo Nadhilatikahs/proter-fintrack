@@ -21,12 +21,12 @@ class TransactionObserver
             ->where('type', 'goal')
             ->first();
 
-        if (! $goal) {
+        if (!$goal) {
             return;
         }
 
-        // Tambahkan income ke current
-        $goal->increment('current', $transaction->amount);
+        // Tambahkan income ke current_amount
+        $goal->increment('current_amount', $transaction->amount);
     }
 
     /**
@@ -42,11 +42,11 @@ class TransactionObserver
             ->where('type', 'goal')
             ->first();
 
-        if (! $goal) {
+        if (!$goal) {
             return;
         }
 
-        $goal->decrement('current', $transaction->amount);
+        $goal->decrement('current_amount', $transaction->amount);
     }
     public function updated(Transaction $transaction): void
     {
@@ -62,7 +62,7 @@ class TransactionObserver
                 ->first();
 
             if ($goal) {
-                $goal->increment('current', $diff);
+                $goal->increment('current_amount', $diff);
             }
         }
     }
