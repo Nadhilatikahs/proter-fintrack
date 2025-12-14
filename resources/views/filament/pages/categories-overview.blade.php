@@ -2,7 +2,7 @@
     <div class="ft-cat-layout">
         {{-- HEADER TITLE + BUTTON --}}
         <div class="ft-cat-header">
-            <h1 class="ft-page-title">Categories</h1>
+            <h1 class="ft-page-title"></h1>
 
             <a
                 href="{{ route('filament.admin.resources.categories.create') }}"

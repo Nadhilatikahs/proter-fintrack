@@ -1,8 +1,7 @@
 /* resources/css/filament-fintrack.css
  *
- * FintracR Filament Theme
- * Palette: #7BAD3E, #1F2937, #CDF59C, #EFF6D2, #C92020
- * Font   : Radio Canada Big
+ * Fintrack Filament Theme - Modern & Professional
+ * Updated Color Palette & Typography
  */
 
 /* =========================
@@ -10,165 +9,631 @@
    ========================= */
 @import '/vendor/filament/filament/resources/css/theme.css';
 
-/* Font */
-@import url('https://fonts.googleapis.com/css2?family=Radio+Canada+Big:wght@400;500;600;700&display=swap');
+/* Modern Font - Poppins (matching sidebar-menu design) */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
 
-/* Color tokens */
+/* Material Symbols for icons (for collapse button) */
+@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0');
+
+/* =========================
+   COLOR TOKENS - Modern Palette
+   ========================= */
 :root {
-    --fintrack-green: #7BAD3E;
-    --fintrack-navy:  #1F2937;
-    --fintrack-lime:  #CDF59C;
-    --fintrack-cream: #EFF6D2;
-    --fintrack-red:   #C92020;
+    /* Primary Colors - Professional Green Palette */
+    --ft-primary: #10B981;
+    /* Emerald Green - modern, trustworthy */
+    --ft-primary-dark: #059669;
+    /* Darker green for hover states */
+    --ft-primary-light: #D1FAE5;
+    /* Light green for backgrounds */
 
-    /* alias yang dipakai kelas .ft-* */
-    --ft-green: var(--fintrack-green);
-    --ft-navy:  var(--fintrack-navy);
-    --ft-lime:  var(--fintrack-lime);
-    --ft-cream: var(--fintrack-cream);
-    --ft-red:   var(--fintrack-red);
+    /* Neutral Colors - Clean & Modern */
+    --ft-navy: #1E293B;
+    /* Slate-800 - professional dark */
+    --ft-navy-light: #334155;
+    /* Slate-700 - lighter dark */
+    --ft-gray: #64748B;
+    /* Slate-500 - medium gray */
+    --ft-gray-light: #F1F5F9;
+    /* Slate-100 - very light gray */
+    --ft-white: #FFFFFF;
+    /* Pure white */
+
+    /* Background Colors - Soft & Professional */
+    --ft-bg-primary: #F8FAFC;
+    /* Slate-50 - main background (soft white) */
+    --ft-bg-card: #FFFFFF;
+    /* White cards */
+    --ft-bg-sidebar: #FFFFFF;
+    /* White sidebar for light mode */
+    --ft-bg-sidebar-dark: #0F172A;
+    /* Slate-900 - dark sidebar for dark mode */
+
+    /* Section/Table Background Colors - Light Blue Theme */
+    --ft-bg-section: #e8f5ff;
+    /* Light blue for sections */
+    --ft-bg-section-alt: #d0ebff;
+    /* Slightly darker for alternating rows */
+    --ft-bg-table-header: #12324a;
+    /* Dark navy for table headers */
+    --ft-bg-table-row: #e8f5ff;
+    /* Light blue for table rows */
+    --ft-bg-table-row-hover: #d0ebff;
+    /* Hover state for rows */
+    --ft-bg-empty: #f0f9ff;
+    /* Very light blue for empty states */
+
+    /* Border Colors */
+    --ft-border-light: rgba(148, 163, 184, 0.2);
+    /* Light border */
+    --ft-border-section: rgba(59, 130, 246, 0.15);
+    /* Section border with blue tint */
+
+    /* Form Input Colors */
+    --ft-input-bg: #FFFFFF;
+    /* White background for inputs */
+    --ft-input-border: #CBD5E1;
+    /* Visible gray border */
+    --ft-input-border-focus: #3B82F6;
+    /* Blue border on focus */
+    --ft-input-text: #0F172A;
+    /* Dark text */
+    --ft-input-placeholder: #94A3B8;
+    /* Gray placeholder */
+
+    /* Accent Colors */
+    --ft-success: #10B981;
+    /* Green for income/success */
+    --ft-danger: #EF4444;
+    /* Red for expenses/danger */
+    --ft-warning: #F59E0B;
+    /* Amber for warnings */
+    --ft-info: #3B82F6;
+    /* Blue for info */
+
+    /* Text Colors */
+    --ft-text-primary: #0F172A;
+    /* Slate-900 - main text */
+    --ft-text-secondary: #475569;
+    /* Slate-600 - secondary text */
+    --ft-text-light: #94A3B8;
+    /* Slate-400 - light text */
+    --ft-text-inverse: #FFFFFF;
+    /* White text for dark backgrounds */
+
+    /* Legacy aliases for backward compatibility */
+    --fintrack-green: var(--ft-primary);
+    --fintrack-navy: var(--ft-navy);
+    --fintrack-lime: var(--ft-primary-light);
+    --fintrack-cream: var(--ft-bg-primary);
+    --fintrack-red: var(--ft-danger);
+
+    --ft-green: var(--ft-primary);
+    --ft-lime: var(--ft-primary-light);
+    --ft-cream: var(--ft-bg-primary);
+    --ft-red: var(--ft-danger);
+}
+
+/* =========================
+   TYPOGRAPHY
+   ========================= */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
 }
 
 body {
-    font-family: 'Radio Canada Big', system-ui, -apple-system, BlinkMacSystemFont,
-        'Segoe UI', sans-serif;
+    font-family: "Poppins", -apple-system, BlinkMacSystemFont, 'Segoe UI',
+        'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+    font-weight: 400;
+    line-height: 1.6;
+    color: #0F172A;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    min-height: 100vh;
+}
+
+/* =========================
+   LIGHT MODE - All text black (except sidebar)
+   ========================= */
+body:not(.dark) {
+    color: #0F172A !important;
+}
+
+/* Main content area text - black */
+body:not(.dark) .fi-main h1,
+body:not(.dark) .fi-main h2,
+body:not(.dark) .fi-main h3,
+body:not(.dark) .fi-main h4,
+body:not(.dark) .fi-main h5,
+body:not(.dark) .fi-main h6,
+body:not(.dark) .fi-main p,
+body:not(.dark) .fi-main span,
+body:not(.dark) .fi-main label,
+body:not(.dark) .fi-main div {
+    color: #0F172A;
+}
+
+/* Filament specific text elements - light mode (main content only) */
+body:not(.dark) .fi-header-heading,
+body:not(.dark) .fi-page-heading,
+body:not(.dark) .fi-section-header-heading,
+body:not(.dark) .fi-fo-field-label,
+body:not(.dark) .fi-input-label,
+body:not(.dark) .fi-ta-text,
+body:not(.dark) .fi-ta-text-item,
+body:not(.dark) [class*="fi-ta-col"],
+body:not(.dark) .fi-breadcrumbs-item,
+body:not(.dark) .fi-tabs-item-label {
+    color: #0F172A !important;
+}
+
+/* Sidebar text stays WHITE on dark background */
+.fi-sidebar,
+.fi-sidebar * {
+    color: #FFFFFF;
+}
+
+.fi-sidebar .fi-sidebar-nav-item>a {
+    color: #FFFFFF !important;
+}
+
+.fi-sidebar .fi-sidebar-nav-item>a span {
+    color: #FFFFFF !important;
+}
+
+.fi-sidebar .fi-sidebar-nav-item-icon,
+.fi-sidebar svg {
+    color: #FFFFFF !important;
+}
+
+.fi-sidebar .fi-sidebar-group-label {
+    color: rgba(255, 255, 255, 0.6) !important;
+}
+
+/* Active item - subtle highlight */
+.fi-sidebar .fi-sidebar-nav-item-active>a,
+.fi-sidebar .fi-sidebar-nav-item.is-active>a {
+    color: #FFFFFF !important;
+    background: rgba(255, 255, 255, 0.15) !important;
+    border-left: 3px solid #10B981 !important;
+}
+
+.fi-sidebar .fi-sidebar-nav-item>a:hover {
+    color: #FFFFFF !important;
+    background: rgba(255, 255, 255, 0.1) !important;
+}
+
+.fi-sidebar .fi-sidebar-nav-item-active>a span,
+.fi-sidebar .fi-sidebar-nav-item.is-active>a span,
+.fi-sidebar .fi-sidebar-nav-item>a:hover span {
+    color: #FFFFFF !important;
+}
+
+.fi-sidebar .fi-sidebar-nav-item-active>a svg,
+.fi-sidebar .fi-sidebar-nav-item.is-active>a svg,
+.fi-sidebar .fi-sidebar-nav-item>a:hover svg {
+    color: #FFFFFF !important;
 }
 
 /* =========================
    LAYOUT & BACKGROUND
    ========================= */
 
-.fi-layout,
-.fi-main,
-.fi-body {
-    background-color: var(--ft-cream);
+.fi-layout {
+    background: transparent !important;
+    min-height: 100vh;
 }
 
-/* Card / panel / widget default */
+.fi-main {
+    background: transparent !important;
+    min-height: 100vh;
+}
+
+.fi-body {
+    background: linear-gradient(#F1FAFF, #CBE4FF) !important;
+    min-height: 100vh;
+}
+
+/* =========================
+   CARDS & PANELS
+   ========================= */
 .fi-section,
 .fi-panel,
 .fi-widget,
 .fi-card {
-    background-color: var(--ft-lime);
-    border-radius: 1.25rem;
-    border-width: 0;
-    color: var(--ft-navy);
+    background-color: var(--ft-bg-section) !important;
+    border-radius: 1.5rem;
+    border: 1px solid rgba(226, 232, 240, 0.8);
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05),
+        0 1px 2px 0 rgba(0, 0, 0, 0.04);
+    color: var(--ft-text-primary);
+    transition: all 0.2s ease;
+}
+
+.fi-section:hover,
+.fi-panel:hover,
+.fi-widget:hover,
+.fi-card:hover {
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.08),
+        0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    transform: translateY(-1px);
 }
 
 /* Heading page utama (Dashboard, Profile, dll) */
 .fi-header-heading {
-    font-size: 2.55rem;
-    color: var(--ft-navy) !important;
+    font-size: 2.25rem;
+    font-weight: 700;
+    color: var(--ft-text-primary) !important;
+    letter-spacing: -0.02em;
+    margin-bottom: 0.5rem;
 }
 
 /* Judul section / label form */
-.fi-section-header-heading
+.fi-section-header-heading,
 .fi-fo-field-label,
 .fi-input-label,
 .fi-form-field-label,
 .fi-ta-text {
-    color: var(--ft-navy) !important;
+    color: var(--ft-text-primary) !important;
+    font-weight: 600;
 }
 
-/* Input / select / textarea di background terang => teks gelap */
+/* Input / select / textarea */
 .fi-input,
 .fi-select,
 .fi-textarea,
 .fi-checkbox-label,
 .fi-radio-label {
-    color: var(--ft-navy) !important;
+    color: var(--ft-text-primary) !important;
 }
 
 /* =========================
-   SIDEBAR
+   FORM INPUTS - Modern Design (Using Variables)
+   ========================= */
+.fi-input,
+.fi-select,
+.fi-textarea {
+    background-color: var(--ft-input-bg) !important;
+    border: none !important;
+    border-radius: 10px !important;
+    color: var(--ft-input-text) !important;
+    color: var(--ft-text-primary) !important;
+    padding: 0.625rem 0.875rem !important;
+    font-size: 0.9375rem !important;
+    transition: all 0.2s ease !important;
+}
+
+.fi-input:focus,
+.fi-select:focus,
+.fi-textarea:focus {
+    outline: none !important;
+    border-color: var(--ft-primary) !important;
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1) !important;
+    background-color: var(--ft-white) !important;
+}
+
+/* Reduce green border emphasis - use subtle gray by default */
+.fi-input-wrp {
+    border-color: rgba(148, 163, 184, 0.3) !important;
+}
+
+.fi-input-wrp:not(:focus-within) {
+    border-color: rgba(148, 163, 184, 0.3) !important;
+}
+
+.fi-input::placeholder,
+.fi-textarea::placeholder {
+    color: var(--ft-input-placeholder) !important;
+    opacity: 1 !important;
+}
+
+.fi-input-wrp {
+    border-radius: 12px !important;
+    border: 2px solid var(--ft-input-border) !important;
+    background-color: var(--ft-input-bg) !important;
+    transition: all 0.2s ease !important;
+}
+
+.fi-input-wrp:focus-within {
+    border-color: var(--ft-input-border-focus) !important;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15) !important;
+    background-color: var(--ft-input-bg) !important;
+}
+
+/* =========================
+   SIDEBAR - Exact copy from sidebar-menu design
    ========================= */
 
 .fi-sidebar {
-    background-color: var(--ft-navy);
-    color: #F9FAFB;
+    position: fixed;
+    width: 270px;
+    margin: 16px;
+    border-radius: 16px;
+    background: #151A2D;
+    height: calc(100vh - 32px);
+    transition: all 0.4s ease;
+    box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
+    z-index: 50;
 }
 
 .fi-sidebar-header {
-    padding-top: 1.5rem;
-    padding-bottom: 1.5rem;
+    display: none !important;
+    /* Hide the sidebar header/logo section - logo is now in top navbar */
+}
+
+/* Adjust sidebar to start from top without header */
+.fi-sidebar-nav {
+    padding-top: 0.5rem !important;
+    margin-top: 0 !important;
+}
+
+/* Remove any empty space at top of sidebar */
+.fi-sidebar>*:first-child {
+    margin-top: 0 !important;
+    padding-top: 0.5rem !important;
+}
+
+/* Logo in top navbar */
+.fi-topbar-logo {
+    display: flex !important;
+    align-items: center !important;
+    margin-right: 1.5rem !important;
+    text-decoration: none !important;
+}
+
+.fi-topbar-logo img {
+    max-width: 140px !important;
+    max-height: 36px !important;
+    height: auto !important;
+    width: auto !important;
+    display: block !important;
+    object-fit: contain !important;
+    transition: transform 0.2s ease !important;
+}
+
+.fi-topbar-logo:hover img {
+    transform: scale(1.02);
+}
+
+/* Collapse button */
+.fi-sidebar-header .sidebar-toggler {
+    height: 35px !important;
+    width: 35px !important;
+    color: #151A2D !important;
+    border: none !important;
+    cursor: pointer !important;
+    display: flex !important;
+    background: #fff !important;
+    align-items: center !important;
+    justify-content: center !important;
+    border-radius: 8px !important;
+    transition: 0.4s ease !important;
+    position: absolute !important;
+    right: 20px !important;
+    z-index: 100 !important;
+    flex-shrink: 0 !important;
+}
+
+.fi-sidebar-header .sidebar-toggler:hover {
+    background: #dde4fb;
+}
+
+.fi-sidebar-header .sidebar-toggler .material-symbols-rounded,
+.fi-sidebar-header .sidebar-toggler span {
+    font-size: 1.75rem;
+    transition: 0.4s ease;
+    display: inline-block;
+    font-family: 'Material Symbols Rounded', sans-serif;
+    font-weight: normal;
+    font-style: normal;
+    line-height: 1;
+    letter-spacing: normal;
+    text-transform: none;
+    white-space: nowrap;
+    word-wrap: normal;
+    direction: ltr;
+}
+
+/* Collapsed sidebar state */
+.fi-sidebar.collapsed {
+    width: 85px;
+}
+
+.fi-sidebar.collapsed .sidebar-toggler {
+    transform: translate(-4px, 65px);
+}
+
+.fi-sidebar.collapsed .sidebar-toggler .material-symbols-rounded,
+.fi-sidebar.collapsed .sidebar-toggler span {
+    transform: rotate(180deg);
+}
+
+.fi-sidebar.collapsed .fi-sidebar-nav .fi-sidebar-group {
+    transform: translateY(0);
+}
+
+.fi-sidebar.collapsed .fi-sidebar-nav-item>a .nav-label,
+.fi-sidebar.collapsed .fi-sidebar-nav-item>a span:not(.fi-sidebar-nav-item-icon):not(svg) {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.fi-sidebar.collapsed .fi-sidebar-nav-item>a {
+    border-radius: 12px;
+    justify-content: center;
+}
+
+.fi-sidebar.collapsed .fi-sidebar-group-label {
+    opacity: 0;
+    pointer-events: none;
+}
+
+/* Show tooltips when collapsed */
+.fi-sidebar.collapsed .fi-sidebar-nav-item .nav-tooltip {
+    display: block;
+}
+
+.fi-sidebar.collapsed .fi-sidebar-nav-item:hover .nav-tooltip {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(50%);
+    transition: all 0.4s ease;
+}
+
+/* Sidebar navigation list */
+.fi-sidebar-nav {
+    display: flex;
+    flex-direction: column;
+    transform: translateY(0);
+}
+
+.fi-sidebar-nav .fi-sidebar-group {
+    list-style: none;
+    display: flex;
+    gap: 4px;
+    padding: 0 15px;
+    flex-direction: column;
+    transition: 0.4s ease;
 }
 
 /* group label: MENU, PROFILE */
 .fi-sidebar-group-label {
     text-transform: uppercase;
-    letter-spacing: 0.08em;
-    font-size: 0.75rem;
-    color: rgba(249, 250, 251, 0.7);
+    letter-spacing: 0.1em;
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.5) !important;
+    padding: 0.5rem 0.5rem 0.5rem;
+    margin-top: 0;
 }
 
-.fi-sidebar-nav-item > a {
-    border-radius: 9999px;
-    padding-top: 0.6rem;
-    padding-bottom: 0.6rem;
-    transition:
-        background-color 150ms ease,
-        box-shadow 150ms ease,
-        transform 150ms ease;
+/* First group (Dashboard) - no top margin */
+.fi-sidebar-nav .fi-sidebar-group:first-child {
+    margin-top: 0;
+    padding-top: 0;
 }
 
-/* hover menu */
-.fi-sidebar-nav-item > a:hover {
-    background-color: rgba(148, 163, 184, 0.2);
+.fi-sidebar-nav .fi-sidebar-group:first-child .fi-sidebar-group-label {
+    margin-top: 0;
+    padding-top: 0.25rem;
 }
 
-/* active menu -> gradient */
-.fi-sidebar-nav-item-active > a {
-    background-image: linear-gradient(
-        90deg,
-        #1F2937 32%,
-        #2E4A70 48%,
-        rgba(140, 158, 184, 0.53) 85%
-    );
-    color: #F9FAFB;
-    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.45);
+.fi-sidebar-nav-item {
+    position: relative;
 }
 
-.fi-sidebar-nav-item-icon {
-    font-size: 1.1rem;
+.fi-sidebar-nav-item>a {
+    color: #fff;
+    display: flex;
+    gap: 12px;
+    white-space: nowrap;
+    border-radius: 8px;
+    padding: 12px 15px;
+    align-items: center;
+    text-decoration: none;
+    transition: 0.4s ease;
 }
 
-.fi-sidebar-footer {
-    margin-top: auto;
-    padding-top: 1.5rem;
-    border-top: 1px solid rgba(148, 163, 184, 0.35);
+.fi-sidebar-nav-item>a span {
+    transition: opacity 0.3s ease;
+}
+
+.fi-sidebar-nav-item>a:hover {
+    color: #151A2D;
+    background: #fff;
+}
+
+.fi-sidebar-nav-item>a:hover .fi-sidebar-nav-item-icon,
+.fi-sidebar-nav-item>a:hover svg {
+    color: #151A2D !important;
+}
+
+/* Active menu item - subtle highlight */
+.fi-sidebar-nav-item-active>a,
+.fi-sidebar-nav-item.is-active>a {
+    color: #FFFFFF !important;
+    background: rgba(255, 255, 255, 0.15) !important;
+    border-left: 3px solid #10B981 !important;
+}
+
+.fi-sidebar-nav-item-active>a .fi-sidebar-nav-item-icon,
+.fi-sidebar-nav-item-active>a svg,
+.fi-sidebar-nav-item.is-active>a .fi-sidebar-nav-item-icon,
+.fi-sidebar-nav-item.is-active>a svg {
+    color: #FFFFFF !important;
+}
+
+/* Tooltip (hidden by default) */
+.fi-sidebar-nav-item .nav-tooltip {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    opacity: 0;
+    color: #151A2D;
+    display: none;
+    pointer-events: none;
+    padding: 6px 12px;
+    border-radius: 8px;
+    white-space: nowrap;
+    background: #fff;
+    left: calc(100% + 25px);
+    box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
+    transition: 0s;
+    z-index: 1000;
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+/* Adjust main content to account for sidebar */
+.fi-main {
+    margin-left: 302px !important;
+    transition: margin-left 0.4s ease;
+    padding: 1.5rem !important;
+    width: calc(100% - 302px) !important;
+    max-width: none !important;
+}
+
+/* Adjust main content when sidebar is collapsed */
+.fi-sidebar.collapsed~.fi-layout .fi-main,
+.fi-sidebar.collapsed~* .fi-main,
+body:has(.fi-sidebar.collapsed) .fi-main {
+    margin-left: 117px !important;
+    width: calc(100% - 117px) !important;
+    /* 85px + 32px margins */
 }
 
 /* =========================
-   GLOBAL BUTTONS
+   GLOBAL BUTTONS - Modern Design
    ========================= */
 
-/* outline hijau untuk "+ Add Your Transaction Today" */
+/* Primary outline button */
 .fin-btn-outline-green,
 .ft-btn-outline-green {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    padding: 0.6rem 1.6rem;
-    border-radius: 999px;
-    border: 2px solid var(--ft-green);
+    padding: 0.75rem 1.75rem;
+    border-radius: 0.75rem;
+    border: 2px solid var(--ft-primary);
     background-color: transparent;
-    color: var(--ft-green);
-    font-size: 0.95rem;
+    color: var(--ft-primary);
+    font-size: 0.9375rem;
     font-weight: 600;
-    transition:
-        background-color 150ms ease,
-        color 150ms ease,
-        box-shadow 150ms ease;
+    transition: all 0.2s ease;
+    cursor: pointer;
 }
 
 .fin-btn-outline-green:hover,
 .ft-btn-outline-green:hover {
-    background-color: var(--ft-green);
-    color: var(--ft-cream);
-    box-shadow: 0 8px 18px rgba(123, 173, 62, 0.35);
+    background-color: var(--ft-primary);
+    color: var(--ft-white);
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
+    transform: translateY(-1px);
 }
 
-/* tombol utilitas */
+/* Utility buttons */
 .fin-btn-dark,
 .fin-btn-red,
 .fin-btn-green,
@@ -176,66 +641,121 @@ body {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    padding: 0.35rem 0.9rem;
-    border-radius: 999px;
-    font-size: 0.8rem;
-    font-weight: 500;
-    border-width: 0;
+    padding: 0.5rem 1rem;
+    border-radius: 0.625rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    border: none;
     cursor: pointer;
+    transition: all 0.2s ease;
 }
 
-/* Edit button - dark blue */
+/* Edit button - dark */
 .fin-btn-dark {
-    background-color: var(--ft-navy);
-    color: var(--ft-cream);
+    background-color: #0F172A;
+    color: #FFFFFF;
+    border-radius: 9999px;
 }
+
 .fin-btn-dark:hover {
-    background-color: #111827;
+    background-color: #1E293B;
+    box-shadow: 0 4px 8px rgba(15, 23, 42, 0.2);
 }
 
-/* Delete button - merah */
+/* Delete button */
 .fin-btn-red {
-    background-color: var(--ft-red);
-    color: var(--ft-cream);
+    background-color: #EF4444;
+    color: #FFFFFF;
+    border-radius: 9999px;
 }
+
 .fin-btn-red:hover {
-    background-color: #a41414;
+    background-color: #DC2626;
+    box-shadow: 0 4px 8px rgba(239, 68, 68, 0.25);
 }
 
-/* Button hijau (input transaction, category) */
+/* Green button */
 .fin-btn-green {
-    background-color: var(--ft-green);
-    color: var(--ft-cream);
+    background-color: var(--ft-primary);
+    color: var(--ft-white);
 }
+
 .fin-btn-green:hover {
-    background-color: #679536;
+    background-color: var(--ft-primary-dark);
+    box-shadow: 0 4px 8px rgba(16, 185, 129, 0.25);
 }
 
-/* Button biru (save, add new budget/goals) */
+/* Blue button */
 .fin-btn-blue {
-    background-color: var(--ft-navy);
-    color: var(--ft-cream);
-}
-.fin-btn-blue:hover {
-    background-color: #111827;
+    background-color: var(--ft-info);
+    color: var(--ft-white);
 }
 
-/* Semua tombol primary bawaan Filament -> biru navy */
+.fin-btn-blue:hover {
+    background-color: #2563EB;
+    box-shadow: 0 4px 8px rgba(59, 130, 246, 0.25);
+}
+
+/* Filament primary buttons */
 button[data-color="primary"],
 .fi-btn[data-color="primary"],
 .fi-button[data-color="primary"],
 .fi-ac-btn[data-color="primary"] {
-    background-color: var(--ft-navy) !important;
-    border-color: var(--ft-navy) !important;
-    color: var(--ft-cream) !important;
+    background-color: var(--ft-primary) !important;
+    border-color: var(--ft-primary) !important;
+    color: var(--ft-white) !important;
+    border-radius: 0.625rem !important;
+    font-weight: 600 !important;
+    transition: all 0.2s ease !important;
 }
 
-/* tombol danger -> merah */
+button[data-color="primary"]:hover,
+.fi-btn[data-color="primary"]:hover,
+.fi-button[data-color="primary"]:hover {
+    background-color: var(--ft-primary-dark) !important;
+    box-shadow: 0 4px 8px rgba(16, 185, 129, 0.25) !important;
+    transform: translateY(-1px) !important;
+}
+
+/* Danger buttons */
 .fi-btn[data-color="danger"],
 .fi-button[data-color="danger"] {
-    background-color: var(--ft-red) !important;
-    border-color: var(--ft-red) !important;
-    color: var(--ft-cream) !important;
+    background-color: var(--ft-danger) !important;
+    border-color: var(--ft-danger) !important;
+    color: var(--ft-white) !important;
+    border-radius: 0.625rem !important;
+}
+
+/* Success buttons (green) */
+.fi-btn[data-color="success"],
+.fi-button[data-color="success"],
+button[data-color="success"],
+.fi-ac-btn-action[data-color="success"] {
+    background-color: #10B981 !important;
+    border-color: #10B981 !important;
+    color: #FFFFFF !important;
+    border-radius: 0.625rem !important;
+    font-weight: 600 !important;
+}
+
+.fi-btn[data-color="success"]:hover,
+.fi-button[data-color="success"]:hover {
+    background-color: #059669 !important;
+}
+
+/* Header action buttons - ensure visibility */
+.fi-header-actions .fi-btn,
+.fi-header-actions .fi-ac-btn-action,
+.fi-page-header-actions .fi-btn,
+[class*="header-actions"] button {
+    color: #FFFFFF !important;
+    font-weight: 600 !important;
+}
+
+.fi-header-actions .fi-btn span,
+.fi-header-actions .fi-ac-btn-action span,
+.fi-page-header-actions .fi-btn span {
+    color: #FFFFFF !important;
 }
 
 /* =========================
@@ -243,12 +763,17 @@ button[data-color="primary"],
    ========================= */
 
 .fi-modal-window {
-    background-color: var(--ft-lime) !important;
-    color: var(--ft-navy) !important;
+    background-color: var(--ft-bg-card) !important;
+    color: var(--ft-text-primary) !important;
+    border-radius: 1rem !important;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1),
+        0 10px 10px -5px rgba(0, 0, 0, 0.04) !important;
+    border: 1px solid rgba(226, 232, 240, 0.8) !important;
 }
 
 .fi-modal-backdrop {
-    background-color: rgba(15, 23, 42, 0.55) !important;
+    background-color: rgba(15, 23, 42, 0.6) !important;
+    backdrop-filter: blur(4px);
 }
 
 .fi-modal-window .fi-btn[data-color="danger"],
@@ -264,15 +789,29 @@ button[data-color="primary"],
 
 
 .ft-page-subtitle {
-    font-size: 1.25rem;
-    color: var(--ft-navy);
+    font-size: 1rem;
+    color: var(--ft-text-secondary);
+    font-weight: 500;
+    margin-bottom: 1.5rem;
+    opacity: 0.9;
+}
+
+/* Welcome message fade-out animation */
+.ft-welcome-message {
+    transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+.ft-welcome-message.fade-out {
+    opacity: 0 !important;
+    transform: translateY(-10px);
 }
 
 /* summary row (income, expense, balance) */
 .ft-summary-row {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 1.25rem;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
 }
 
 @media (max-width: 1024px) {
@@ -282,35 +821,99 @@ button[data-color="primary"],
 }
 
 .ft-summary-card {
-    border-radius: 1.4rem;
-    padding: 1.3rem 1.5rem;
-    background-color: var(--ft-lime);
-    box-shadow: 0 12px 30px rgba(15,23,42,0.08);
+    border-radius: 1.25rem;
+    padding: 1.75rem;
+    background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.08),
+        0 2px 4px -1px rgba(0, 0, 0, 0.06),
+        0 0 0 1px rgba(226, 232, 240, 0.5);
+    border: none;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+.ft-summary-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, transparent, currentColor, transparent);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.ft-summary-card:hover {
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1),
+        0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    transform: translateY(-4px);
+}
+
+.ft-summary-card:hover::before {
+    opacity: 1;
 }
 
 .ft-summary-title {
-    font-size: 0.95rem;
-    margin-bottom: .35rem;
-    font-weight: 500;
+    font-size: 0.875rem;
+    margin-bottom: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    opacity: 0.8;
 }
 
 .ft-summary-value {
-    font-size: 1.4rem;
-    font-weight: 700;
+    font-size: 1.75rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    line-height: 1.2;
 }
 
-/* warna teks khusus summary */
+/* Income card - Modern green gradient */
+.ft-summary-income {
+    background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
+    border-left: 4px solid var(--ft-success);
+}
+
 .ft-summary-income .ft-summary-title,
 .ft-summary-income .ft-summary-value {
-    color: var(--ft-green);
+    color: #065f46;
 }
+
+.ft-summary-income::before {
+    background: linear-gradient(90deg, transparent, #10b981, transparent);
+}
+
+/* Expense card - Modern red gradient */
+.ft-summary-expense {
+    background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+    border-left: 4px solid var(--ft-danger);
+}
+
 .ft-summary-expense .ft-summary-title,
 .ft-summary-expense .ft-summary-value {
-    color: var(--ft-red);
+    color: #991b1b;
 }
+
+.ft-summary-expense::before {
+    background: linear-gradient(90deg, transparent, #ef4444, transparent);
+}
+
+/* Balance card - Modern blue gradient */
+.ft-summary-balance {
+    background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+    border-left: 4px solid var(--ft-info);
+}
+
 .ft-summary-balance .ft-summary-title,
 .ft-summary-balance .ft-summary-value {
-    color: var(--ft-navy);
+    color: #1e40af;
+}
+
+.ft-summary-balance::before {
+    background: linear-gradient(90deg, transparent, #3b82f6, transparent);
 }
 
 /* toolbar tanggal + button add transaction */
@@ -318,12 +921,15 @@ button[data-color="primary"],
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 1rem;
+    gap: 1.5rem;
     flex-wrap: wrap;
-    border-radius: 1.4rem;
-    padding: 1rem 1.25rem;
-    background-color: var(--ft-lime);
-    box-shadow: 0 10px 26px rgba(15,23,42,0.08);
+    border-radius: 1rem;
+    padding: 1.25rem 1.5rem;
+    background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.08),
+        0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    border: 1px solid rgba(226, 232, 240, 0.8);
+    margin-bottom: 2rem;
 }
 
 .ft-date-range {
@@ -334,22 +940,33 @@ button[data-color="primary"],
 }
 
 .ft-label {
-    font-size: 0.85rem;
-    color: var(--ft-navy);
+    font-size: 0.875rem;
+    color: var(--ft-text-secondary);
+    font-weight: 600;
 }
 
 .ft-input-date {
-    border-radius: 9999px;
-    border: 1px solid rgba(15,23,42,0.15);
+    border-radius: 0.625rem;
+    border: 1px solid rgba(226, 232, 240, 0.8);
     background-color: #ffffff;
-    padding: 0.4rem 0.9rem;
-    font-size: 0.9rem;
-    color: var(--ft-navy);
+    padding: 0.625rem 1rem;
+    font-size: 0.9375rem;
+    color: var(--ft-text-primary);
+    font-weight: 500;
+    transition: all 0.2s ease;
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+}
+
+.ft-input-date:hover {
+    border-color: var(--ft-primary);
+    box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.08);
 }
 
 .ft-input-date:focus {
-    outline: 2px solid var(--ft-green);
-    outline-offset: 1px;
+    outline: none;
+    border-color: var(--ft-primary);
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1),
+        0 2px 4px 0 rgba(0, 0, 0, 0.08);
 }
 
 /* Dashboard grid: chart + list */
@@ -357,6 +974,8 @@ button[data-color="primary"],
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 1.5rem;
+    background-color: transparent;
+    padding: 0;
 }
 
 @media (max-width: 1024px) {
@@ -366,43 +985,62 @@ button[data-color="primary"],
 }
 
 .ft-card {
-    border-radius: 1.4rem;
-    padding: 1.25rem 1.5rem;
-    box-shadow: 0 12px 30px rgba(15,23,42,0.12);
+    border-radius: 1.25rem;
+    padding: 1.75rem;
+    background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.08),
+        0 2px 4px -1px rgba(0, 0, 0, 0.06),
+        0 0 0 1px rgba(226, 232, 240, 0.5);
+    border: none;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.ft-card:hover {
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1),
+        0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    transform: translateY(-2px);
 }
 
 .ft-card-light {
-    background-color: var(--ft-lime);
-    color: var(--ft-navy);
+    background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+    color: var(--ft-text-primary);
 }
 
 .ft-section-title {
-    font-size: 1.1rem;
-    font-weight: 600;
-    margin-bottom: 0.9rem;
-    color: var(--ft-navy);
+    font-size: 1.125rem;
+    font-weight: 700;
+    margin-bottom: 1.5rem;
+    color: var(--ft-text-primary);
+    letter-spacing: -0.01em;
+    padding-bottom: 0.75rem;
+    border-bottom: 2px solid rgba(226, 232, 240, 0.8);
 }
 
 /* last transactions */
 .ft-last-transactions {
-    margin-top: 1.25rem;
+    margin-top: 2rem;
 }
 
 .ft-last-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-bottom: 0.75rem;
+    margin-bottom: 1.25rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 2px solid rgba(226, 232, 240, 0.8);
 }
 
 .ft-detail-title {
-    color: #1D4ED8;
-    font-weight: 600;
+    color: var(--ft-info);
+    font-weight: 700;
+    font-size: 1.125rem;
+    letter-spacing: -0.01em;
 }
 
 .ft-arrow-up-right {
     margin-left: 0.25rem;
     font-size: 0.9rem;
+    opacity: 0.7;
 }
 
 .ft-transaction-list {
@@ -411,47 +1049,68 @@ button[data-color="primary"],
     padding: 0;
     display: flex;
     flex-direction: column;
-    gap: 0.75rem;
+    gap: 1rem;
 }
 
 .ft-transaction-item {
     display: flex;
-    align-items: baseline;
+    align-items: center;
     justify-content: space-between;
-    gap: 1rem;
-    border-bottom: 1px dashed rgba(15,23,42,0.15);
-    padding-bottom: 0.4rem;
+    gap: 1.5rem;
+    padding: 1rem 1.25rem;
+    background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);
+    border-radius: 0.75rem;
+    border: 1px solid rgba(226, 232, 240, 0.6);
+    transition: all 0.2s ease;
+}
+
+.ft-transaction-item:hover {
+    background: linear-gradient(135deg, #ffffff 0%, #f1f5f9 100%);
+    border-color: rgba(16, 185, 129, 0.3);
+    box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.05);
+    transform: translateX(4px);
 }
 
 .ft-transaction-main {
-    max-width: 70%;
+    flex: 1;
+    min-width: 0;
 }
 
 .ft-transaction-title {
-    font-weight: 500;
+    font-weight: 600;
+    font-size: 0.9375rem;
+    color: var(--ft-text-primary);
+    margin-bottom: 0.25rem;
 }
 
 .ft-transaction-meta {
-    font-size: 0.8rem;
+    font-size: 0.8125rem;
+    color: var(--ft-text-secondary);
     opacity: 0.8;
 }
 
 .ft-transaction-amount {
-    font-weight: 600;
+    font-weight: 700;
+    font-size: 1rem;
     white-space: nowrap;
+    letter-spacing: -0.01em;
 }
 
 .ft-transaction-amount.is-expense {
-    color: var(--ft-red);
+    color: var(--ft-danger);
 }
 
 .ft-transaction-amount.is-income {
-    color: var(--ft-green);
+    color: var(--ft-success);
 }
 
 .ft-empty-state {
-    font-size: 0.9rem;
-    opacity: 0.9;
+    font-size: 0.9375rem;
+    color: var(--ft-text-secondary);
+    text-align: center;
+    padding: 2rem;
+    opacity: 0.7;
+    font-style: italic;
 }
 
 /* =========================
@@ -461,7 +1120,19 @@ button[data-color="primary"],
 /* Table header & body teks gelap */
 .fi-ta-table th,
 .fi-ta-table td {
-    color: var(--ft-navy);
+    color: #0F172A !important;
+}
+
+/* Text columns in tables */
+.fi-ta-text,
+.fi-ta-text-item,
+[class*="fi-ta-col"] {
+    color: #0F172A !important;
+}
+
+.fi-ta-text-item-label {
+    color: #0F172A !important;
+    font-weight: 500;
 }
 
 /* badge/pill pada type/category */
@@ -520,15 +1191,18 @@ button[data-color="primary"],
 /* wrapper utama */
 .ft-cat-layout {
     width: 100%;
+    max-width: 100%;
     padding: 2.5rem 2rem 3rem;
     display: flex;
-    justify-content: center;   /* bikin konten di tengah */
+    flex-direction: column;
+    box-sizing: border-box;
 }
 
 /* konten tengah */
 .ft-cat-container {
     width: 100%;
-    max-width: 1100px;         /* SAMA KAYA TRANSACTIONS */
+    max-width: 1100px;
+    /* SAMA KAYA TRANSACTIONS */
 }
 
 /* header */
@@ -547,13 +1221,20 @@ button[data-color="primary"],
 
 /* header kolom */
 .ft-cat-table-head {
-    display: grid;
-    grid-template-columns: 2fr 3fr 1.5fr;
-    padding: 0 1.75rem;
-    margin-bottom: .85rem;
-    font-size: .95rem;
+    display: grid !important;
+    grid-template-columns: 2fr 2fr 2fr !important;
+    flex-direction: row !important;
+    padding: 0.85rem 1.75rem;
+    margin-bottom: 0.5rem;
+    font-size: 0.95rem;
     font-weight: 700;
-    color: var(--ft-navy);
+    color: #0F172A;
+    gap: 1rem;
+}
+
+.ft-cat-table-head span,
+.ft-cat-table-head div {
+    display: inline-block !important;
 }
 
 /* list */
@@ -563,16 +1244,18 @@ button[data-color="primary"],
     gap: 1.25rem;
 }
 
-/* row pill */
+/* row pill - white with border */
 .ft-cat-row {
-    display: grid;
-    grid-template-columns: 2fr 3fr 1.5fr;
+    display: grid !important;
+    grid-template-columns: 2fr 2fr 2fr !important;
     align-items: center;
-    background: #12324a;       /* SAMA KAYA TRANSACTIONS */
-    border-radius: 9999px;
-    padding: 1.15rem 2rem;
-    box-shadow: 0 18px 40px rgba(15,23,42,.18);
-    color: #ffffff;
+    background: #FFFFFF;
+    border-radius: 16px;
+    padding: 0.85rem 1.75rem;
+    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.08);
+    border: 1px solid #d0e8fc;
+    color: #0F172A;
+    gap: 1rem;
 }
 
 /* kolom */
@@ -826,17 +1509,11 @@ button[data-color="primary"],
 
 .fi-fo-component,
 .fi-fo-field-wrapper,
-.fi-fo-layout > div {
+.fi-fo-layout>div {
     color: var(--ft-navy);
 }
 
-/* input field bg sedikit lebih terang */
-.fi-input,
-.fi-select,
-.fi-textarea {
-    background-color: #F3F4F6;
-    border-radius: 999px;
-}
+/* Legacy input styles - overridden by modern styles above */
 
 /* radio / checkbox label */
 .fi-radio-label,
@@ -849,9 +1526,9 @@ button[data-color="primary"],
    ========================= */
 
 :root {
-    --ft-navy:  #1F2937;
+    --ft-navy: #1F2937;
     --ft-green: #7BAD3E;
-    --ft-lime:  #CDF59C;
+    --ft-lime: #CDF59C;
     --ft-cream: #EFF6D2;
 }
 
@@ -1047,7 +1724,8 @@ button[data-color="primary"],
 }
 
 .fi-modal-window {
-    background-color: #D9F7A9 !important; /* hijau muda */
+    background-color: #D9F7A9 !important;
+    /* hijau muda */
     color: #111827 !important;
     border-radius: 1.5rem !important;
     box-shadow: 0 18px 40px rgba(15, 23, 42, 0.35) !important;
@@ -1084,26 +1762,28 @@ button[data-color="primary"],
    Berlaku di halaman create & edit resource
    ========================================== */
 
-/* Wrapper semua input di form create/edit */
+/* Wrapper semua input di form create/edit (using variables) */
 .fi-resource-create-record-page .fi-input-wrp,
-.fi-resource-edit-record-page  .fi-input-wrp {
-    border-radius: 999px !important;
-    border: 2px solid #9CD26A !important;        /* hijau soft, rapi */
-    background-color: #F9FAFB !important;        /* isi putih terang */
-    box-shadow: none !important;                 /* buang ring ganda */
+.fi-resource-edit-record-page .fi-input-wrp {
+    border-radius: 12px !important;
+    border: 2px solid var(--ft-input-border) !important;
+    background-color: var(--ft-input-bg) !important;
+    box-shadow: none !important;
 }
 
-/* Glow saat fokus – tidak merusak stroke hijau */
+/* Glow saat fokus */
 .fi-resource-create-record-page .fi-input-wrp:focus-within,
-.fi-resource-edit-record-page  .fi-input-wrp:focus-within {
-    box-shadow: 0 0 0 3px rgba(156, 210, 106, 0.35) !important;
-    color: #111827 !important;
+.fi-resource-edit-record-page .fi-input-wrp:focus-within {
+    border-color: var(--ft-input-border-focus) !important;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2) !important;
+    background-color: var(--ft-input-bg) !important;
+    color: var(--ft-input-text) !important;
 }
 
 /* Hilangkan border tambahan di input di dalamnya
    supaya tidak muncul garis kedua di sisi kiri/kanan */
 .fi-resource-create-record-page .fi-input,
-.fi-resource-edit-record-page  .fi-input {
+.fi-resource-edit-record-page .fi-input {
     border-radius: 999px !important;
     border: none !important;
     background-color: transparent !important;
@@ -1111,22 +1791,25 @@ button[data-color="primary"],
 
 /* Prefix 'Rp' ikut menyatu dengan pill */
 .fi-resource-create-record-page .fi-input-wrp-prefix,
-.fi-resource-edit-record-page  .fi-input-wrp-prefix {
+.fi-resource-edit-record-page .fi-input-wrp-prefix {
     border-radius: 999px 0 0 999px !important;
     background-color: transparent !important;
-    color: #6B7280 !important;                   /* abu gelap, tetap terbaca */
+    color: #6B7280 !important;
+    /* abu gelap, tetap terbaca */
     font-weight: 600;
 }
 
 /* Judul section: Info utama, Detail, dll */
 .fi-section-header-heading {
-    color: #12324a;          /* biru gelap */
+    color: #12324a;
+    /* biru gelap */
     font-weight: 2000;
 }
 
 /* Label field: Nama, Deskripsi, Tipe, Target / Batas nominal, Tanggal pencapaian, dll */
 .fi-fo-field-wrp-label span {
-    color: #12324a;          /* biru gelap */
+    color: #12324a;
+    /* biru gelap */
 }
 
 /* ====== TEKS DI DALAM INPUT / TEXTAREA / SELECT ====== */
@@ -1138,7 +1821,8 @@ button[data-color="primary"],
 .fi-input,
 .fi-select-input,
 textarea.fi-input {
-    color: #12324a !important;        /* biru gelap, jelas kebaca */
+    color: #12324a !important;
+    /* biru gelap, jelas kebaca */
 }
 
 /* placeholder */
@@ -1146,14 +1830,16 @@ textarea.fi-input {
 .fi-fo-field-wrp-input textarea::placeholder,
 .fi-input::placeholder,
 .fi-select-input::placeholder {
-    color: #7a8c9a !important;        /* abu-abu medium */
+    color: #7a8c9a !important;
+    /* abu-abu medium */
     opacity: 1;
 }
 
 /* opsi di dropdown (budget/goal, period, dll) */
 .fi-select-input option {
     color: #12324a !important;
-    background-color: #ffffff;        /* biar dropdown tetap terang */
+    background-color: #ffffff;
+    /* biar dropdown tetap terang */
 }
 
 /* kalau field disabled / readonly tetap gelap tapi sedikit redup */
@@ -1170,8 +1856,9 @@ textarea.fi-input {
 
 /* Save (fi-btn-color-primary) -> biru tua ala figma */
 .fi-resource-create-record-page .fi-form-actions .fi-btn.fi-btn-color-primary,
-.fi-resource-edit-record-page  .fi-form-actions .fi-btn.fi-btn-color-primary {
-    background-color: #1F2937 !important;   /* dark blue */
+.fi-resource-edit-record-page .fi-form-actions .fi-btn.fi-btn-color-primary {
+    background-color: #1F2937 !important;
+    /* dark blue */
     border-color: #1F2937 !important;
     color: #EFF6D2 !important;
     border-radius: 999px !important;
@@ -1180,7 +1867,7 @@ textarea.fi-input {
 
 /* Cancel (fi-btn-color-gray) -> outline abu */
 .fi-resource-create-record-page .fi-form-actions .fi-btn.fi-btn-color-gray,
-.fi-resource-edit-record-page  .fi-form-actions .fi-btn.fi-btn-color-gray {
+.fi-resource-edit-record-page .fi-form-actions .fi-btn.fi-btn-color-gray {
     background-color: transparent !important;
     border-radius: 999px !important;
     border-width: 1px !important;
@@ -1193,21 +1880,89 @@ textarea.fi-input {
    TRANSACTION LIST – Figma-like
    ============================ */
 
+/* Filament Table Wrapper/Container - Light Theme */
+.fi-ta-ctn,
+.fi-ta-content {
+    background: var(--ft-bg-section) !important;
+    border-radius: 1.5rem !important;
+    border: 1px solid var(--ft-border-section) !important;
+    overflow: hidden;
+}
+
+.fi-ta-header-ctn {
+    background: var(--ft-white) !important;
+    border-bottom: 1px solid var(--ft-border-section) !important;
+    padding: 1rem 1.5rem !important;
+}
+
 .fi-ta-table {
     background: transparent;
 }
 
-.fi-ta-table tbody tr {
-    background: #f4f5ff;           /* pill row */
-    border-radius: 9999px;
+/* Table Header */
+.fi-ta-table thead {
+    background: var(--ft-white) !important;
 }
 
-.fi-ta-table tbody tr > td:first-child {
+.fi-ta-table thead th {
+    background: transparent !important;
+    color: var(--ft-text-primary) !important;
+    font-weight: 600 !important;
+    border-bottom: 1px solid var(--ft-border-section) !important;
+}
+
+/* Table Rows */
+.fi-ta-table tbody tr {
+    background: #FFFFFF !important;
+    border-radius: 9999px;
+    transition: all 0.2s ease;
+}
+
+.fi-ta-table tbody tr:hover {
+    background: #F1F5F9 !important;
+}
+
+.fi-ta-table tbody tr td {
+    color: #0F172A !important;
+    border-bottom: 1px solid var(--ft-border-section) !important;
+}
+
+/* Ensure all text in table cells is visible */
+.fi-ta-table tbody tr td *,
+.fi-ta-table tbody tr td span,
+.fi-ta-table tbody tr td p,
+.fi-ta-table tbody tr td div {
+    color: #0F172A !important;
+}
+
+/* Badge/pill styling in tables */
+.fi-ta-table .fi-badge {
+    background: #E2E8F0 !important;
+    color: #0F172A !important;
+    border: 1px solid #CBD5E1 !important;
+}
+
+.fi-ta-table tbody tr>td:first-child {
     border-radius: 9999px 0 0 9999px;
 }
 
-.fi-ta-table tbody tr > td:last-child {
+.fi-ta-table tbody tr>td:last-child {
     border-radius: 0 9999px 9999px 0;
+}
+
+/* Empty State */
+.fi-ta-empty-state {
+    background: var(--ft-bg-empty) !important;
+    padding: 3rem !important;
+}
+
+.fi-ta-empty-state-icon {
+    color: var(--ft-gray) !important;
+}
+
+.fi-ta-empty-state-heading,
+.fi-ta-empty-state-description {
+    color: var(--ft-text-primary) !important;
 }
 
 .ft-pill {
@@ -1255,12 +2010,30 @@ textarea.fi-input {
 
 .ft-form-card {
     border-radius: 1.5rem;
-    background: #ffffff;
+    background: #e8f5ff;
     box-shadow:
         0 20px 40px rgba(0, 0, 0, 0.06),
-        0 0 0 1px rgba(209, 213, 219, 0.6);
+        0 0 0 1px rgba(59, 130, 246, 0.2);
     padding: 2rem;
     margin-block: 2rem;
+}
+
+/* Filament form section card with light blue */
+.fi-section.ft-form-card,
+section.ft-form-card {
+    background: #e8f5ff !important;
+    border-radius: 1.5rem !important;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05) !important;
+}
+
+.fi-section.ft-form-card .fi-section-header,
+section.ft-form-card .fi-section-header {
+    background: transparent !important;
+}
+
+.fi-section.ft-form-card .fi-section-content-ctn,
+section.ft-form-card .fi-section-content-ctn {
+    border-top-color: rgba(59, 130, 246, 0.15) !important;
 }
 
 .ft-form-fieldset {
@@ -1275,21 +2048,36 @@ textarea.fi-input {
 
 /* Label form – gelap jika background terang */
 .fi-fo-field-wrp-label span {
-    color: #0f172a; /* slate-900 */
+    color: #0f172a;
+    /* slate-900 */
 }
 
-/* Input / textarea / select – putih bersih, outline hijau lembut */
+/* Input / textarea / select – white with visible border (using variables) */
 .fi-input,
 .fi-textarea,
 .fi-select-input {
-    background-color: #f9fafb;
-    color: #0f172a;
-    border-radius: 9999px;
+    background-color: var(--ft-input-bg) !important;
+    color: var(--ft-input-text) !important;
+    border-radius: 10px !important;
 }
 
 .fi-input-wrp-input,
 .fi-select-input {
-    border-radius: 9999px !important;
+    border-radius: 10px !important;
+}
+
+/* Select wrapper needs visible border too */
+.fi-select-trigger,
+[data-field-wrapper]>div,
+.choices__inner {
+    background-color: var(--ft-input-bg) !important;
+    border: 2px solid var(--ft-input-border) !important;
+    border-radius: 12px !important;
+}
+
+.fi-select-trigger:focus,
+.fi-select-trigger:focus-within {
+    border-color: var(--ft-input-border-focus) !important;
 }
 
 /* Numeric input hijau dengan outline yang rapi */
@@ -1298,15 +2086,19 @@ textarea.fi-input {
     opacity: 1;
 }
 
+/* Input wrapper - visible white with gray border (using variables) */
 .fi-input-wrp {
-    border-radius: 9999px;
-    background: #d9f99d;
+    border-radius: 12px !important;
+    background: var(--ft-input-bg) !important;
+    border: 2px solid var(--ft-input-border) !important;
 }
 
-.fi-input-wrp-input > input,
-.fi-input-wrp-input > .fi-input {
-    border-radius: 9999px;
-    box-shadow: 0 0 0 2px #bbf7d0;
+.fi-input-wrp-input>input,
+.fi-input-wrp-input>.fi-input {
+    border-radius: 10px !important;
+    box-shadow: none !important;
+    background: transparent !important;
+    color: var(--ft-input-text) !important;
 }
 
 /* Select dropdown terang */
@@ -1463,9 +2255,19 @@ body {
     align-items: center;
     padding: 0.85rem 1.75rem;
     column-gap: 1rem;
-    background: #12324a;
+    background: #FFFFFF;
     margin-bottom: 0.65rem;
-    border-radius: 9999px;
+    border-radius: 16px;
+    color: #0F172A;
+    transition: all 0.2s ease;
+    border: 1px solid #d0e8fc;
+    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.08);
+}
+
+.ft-trans-row:hover {
+    background: #f0f7ff;
+    border-color: #93c5fd;
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.12);
 }
 
 .ft-trans-header {
@@ -1573,7 +2375,8 @@ body {
 .ft-card-form .fi-input-wrp textarea,
 .ft-card-form .fi-input-wrp select,
 .ft-card-form .fi-select-input {
-    color: #041626 !important;          /* biru gelap */
+    color: #041626 !important;
+    /* biru gelap */
 }
 
 /* placeholder tetap abu-abu lembut */
@@ -1587,10 +2390,12 @@ body {
     color: #041626;
     font-weight: 600;
 }
+
 /* Tambah jarak vertikal di field yang pakai textarea */
 .ft-card-form .fi-input-wrp textarea {
     margin-top: 0.40rem;
-    margin-right: 0.35rem;     /* jarak kecil antara label dan kotak textarea */
+    margin-right: 0.35rem;
+    /* jarak kecil antara label dan kotak textarea */
     margin-left: 0.35rem;
 }
 
@@ -1673,8 +2478,10 @@ body {
 
 /* tampilan dalam input (single select) */
 .ft-card-form .choices__inner {
-    background-color: #f9fafb !important;  /* abu muda */
-    color: #041626 !important;             /* biru gelap */
+    background-color: #f9fafb !important;
+    /* abu muda */
+    color: #041626 !important;
+    /* biru gelap */
     border-radius: 999px !important;
     border: none !important;
     padding-inline: 0.75rem !important;
@@ -1717,8 +2524,9 @@ body {
    ============================ */
 
 .ft-cat-layout {
-    max-width: 900px;
-    margin: 0 auto;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0;
     padding: 2.5rem 0 3rem;
 }
 
@@ -1731,14 +2539,16 @@ body {
 }
 
 .ft-cat-table-head {
-    display: grid;
-    grid-template-columns: 1.6fr 1.2fr auto;
-    max-width: 900px;
-    margin: 0 auto 0.5rem;
-    padding: 0 0.75rem;
-    font-size: 0.9rem;
-    font-weight: 600;
-    color: #16324f; /* biru gelap */
+    display: grid !important;
+    grid-template-columns: 2fr 2fr 2fr !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 0 0.5rem;
+    padding: 0.85rem 1.75rem;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #0F172A;
+    gap: 1rem;
 }
 
 .ft-cat-head-label.text-right {
@@ -1752,13 +2562,15 @@ body {
 }
 
 .ft-cat-row {
-    display: grid;
-    grid-template-columns: 1.6fr 1.2fr auto;
+    display: grid !important;
+    grid-template-columns: 2fr 2fr 2fr !important;
     align-items: center;
-    background: #f5f7fb;
-    border-radius: 999px;
-    padding: 0.9rem 1.5rem;
-    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.06);
+    background: #FFFFFF;
+    border-radius: 16px;
+    padding: 0.85rem 1.75rem;
+    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.08);
+    border: 1px solid #d0e8fc;
+    gap: 1rem;
 }
 
 .ft-cat-date {
@@ -1811,10 +2623,13 @@ body {
    ============================ */
 
 .ft-cat-layout {
-    /* lebih lebar dan agak ke kiri, biar kesan "kecil" hilang */
-    max-width: 1120px;
-    margin: 0 auto;
+    width: 100%;
+    max-width: 100%;
+    margin: 0;
     padding: 2.5rem 2rem 3rem;
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box;
 }
 
 .ft-cat-header {
@@ -1826,59 +2641,110 @@ body {
 }
 
 .ft-cat-header .ft-page-title {
-    font-size: 2.25rem; /* sama seperti heading lain */
+    font-size: 2.25rem;
+    /* sama seperti heading lain */
     font-weight: 800;
-    color: #16324f;     /* biru gelap */
+    color: #16324f;
+    /* biru gelap */
 }
 
-/* header kecil Date / Category / Actions */
+/* header kecil Date / Category / Actions - matching ft-trans-header */
 .ft-cat-table-head {
-    display: grid;
-    grid-template-columns: 1.8fr 1.2fr auto;
-    margin-bottom: 0.75rem;
-    padding: 0 1.5rem;
+    display: grid !important;
+    grid-template-columns: 2fr 2fr 2fr !important;
+    align-items: center;
+    padding: 0.85rem 1.75rem;
+    column-gap: 1rem;
+    background: transparent;
+    font-weight: 700;
+    color: #111827;
+    box-shadow: none;
+    margin-bottom: 0;
     font-size: 0.95rem;
-    font-weight: 600;
-    color: #16324f;
+}
+
+.ft-cat-head-label {
+    text-align: left !important;
+    padding: 0;
 }
 
 .ft-cat-head-label.text-right {
-    text-align: right;
+    text-align: right !important;
 }
 
-/* list row */
+/* list row - matching ft-trans-table */
 .ft-cat-list {
+    margin-top: 0.5rem;
+    border-radius: 26px;
+    overflow: hidden;
+    background: transparent;
     display: flex;
     flex-direction: column;
-    gap: 1.25rem;
+    gap: 0;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
 }
 
-/* row dibuat lebih lebar & tinggi */
+/* row - matching goal style with light blue background */
 .ft-cat-row {
     display: grid;
-    grid-template-columns:auto;
+    grid-template-columns: 2fr 2fr 2fr;
     align-items: center;
-    background: #f5f7fb;
-    border-radius: 999px;
-    padding: 1.1rem 2rem;
-    box-shadow: 0 18px 40px rgba(0, 0, 0, 0.08);
-    font-size: 1rem;
+    padding: 0.85rem 1.75rem;
+    column-gap: 1rem;
+    background: #FFFFFF;
+    margin-bottom: 0.65rem;
+    border-radius: 16px;
+    font-size: 0.95rem;
+    transition: all 0.2s ease;
+    color: #0F172A;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    border: 1px solid #d0e8fc;
+    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.08);
 }
 
+.ft-cat-row:hover {
+    background: #f0f7ff;
+    border-color: #93c5fd;
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.12);
+}
+
+/* Date - dark text on light row */
 .ft-cat-date {
-    font-weight: 600;
-    color: #16324f;
+    font-weight: 500;
+    color: #0F172A;
+    font-size: 0.95rem;
+    display: flex;
+    align-items: center;
 }
 
+/* Category */
 .ft-cat-name {
     display: flex;
+    align-items: center;
     justify-content: flex-start;
 }
 
+/* Actions - horizontal buttons */
 .ft-cat-actions {
     display: flex;
+    gap: 0.5rem;
+    align-items: center;
     justify-content: flex-end;
-    gap: 0.6rem;
+}
+
+/* Category pill on light background */
+.ft-cat-row .ft-pill-category {
+    background: #3B82F6;
+    color: #FFFFFF;
+    border: none;
+    padding: 0.25rem 0.9rem;
+    border-radius: 9999px;
+    font-size: 0.8rem;
+    font-weight: 600;
 }
 
 .ft-empty-text {
@@ -1967,7 +2833,7 @@ body {
 .ft-report-tabs {
     display: inline-flex;
     gap: 0.5rem;
-    background-color: rgba(31,41,55,0.05);
+    background-color: rgba(31, 41, 55, 0.05);
     padding: 0.3rem;
     border-radius: 999px;
     align-self: flex-start;
@@ -2043,7 +2909,7 @@ body {
 
 .ft-report-table th,
 .ft-report-table td {
-    border: 1px solid rgba(148,163,184,0.7);
+    border: 1px solid rgba(148, 163, 184, 0.7);
     padding: 0.35rem 0.6rem;
 }
 
@@ -2056,83 +2922,710 @@ body {
     text-align: center;
     padding: 0.7rem;
 }
+
 /* REPORTS - DAILY */
 .ft-report-toolbar {
-  margin-top: 0.75rem;
+    margin-top: 0.75rem;
 }
 
 .ft-report-filter {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.75rem;
-  align-items: end;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    align-items: end;
 }
 
 .ft-filter-item {
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
 }
 
 .ft-report-summary-grid {
-  margin-top: 1rem;
-  display: grid;
-  gap: 1rem;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+    margin-top: 1rem;
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
 }
+
 @media (max-width: 1024px) {
-  .ft-report-summary-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .ft-report-summary-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
 }
+
 @media (max-width: 640px) {
-  .ft-report-summary-grid { grid-template-columns: 1fr; }
+    .ft-report-summary-grid {
+        grid-template-columns: 1fr;
+    }
 }
 
 .ft-chip-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-}
-.ft-chip {
-  background: #CDF59C;
-  color: #1F2937;
-  border: 1px solid rgba(31,41,55,.15);
-  padding: 0.35rem 0.7rem;
-  border-radius: 999px;
-  font-size: 0.85rem;
-  font-weight: 600;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
 }
 
-.ft-table-wrap { overflow-x: auto; }
+.ft-chip {
+    background: #CDF59C;
+    color: #1F2937;
+    border: 1px solid rgba(31, 41, 55, .15);
+    padding: 0.35rem 0.7rem;
+    border-radius: 999px;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.ft-table-wrap {
+    overflow-x: auto;
+}
 
 .ft-table {
-  width: 100%;
-  border-collapse: collapse;
-  background: transparent;
+    width: 100%;
+    border-collapse: collapse;
+    background: transparent;
 }
+
 .ft-table th {
-  text-align: left;
-  font-size: 0.85rem;
-  color: #1F2937;
-  padding: 0.75rem 0.6rem;
-  border-bottom: 1px solid rgba(31,41,55,.12);
+    text-align: left;
+    font-size: 0.85rem;
+    color: #1F2937;
+    padding: 0.75rem 0.6rem;
+    border-bottom: 1px solid rgba(31, 41, 55, .12);
 }
+
 .ft-table td {
-  padding: 0.75rem 0.6rem;
-  border-bottom: 1px solid rgba(31,41,55,.08);
-  color: #1F2937;
+    padding: 0.75rem 0.6rem;
+    border-bottom: 1px solid rgba(31, 41, 55, .08);
+    color: #1F2937;
 }
 
 .ft-table tr.is-missing td {
-  background: rgba(201, 32, 32, 0.06);
+    background: rgba(201, 32, 32, 0.06);
 }
 
 .ft-pill {
-  display: inline-flex;
-  align-items: center;
-  padding: 0.2rem 0.6rem;
-  border-radius: 999px;
-  font-size: 0.8rem;
-  font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    padding: 0.2rem 0.6rem;
+    border-radius: 999px;
+    font-size: 0.8rem;
+    font-weight: 700;
 }
-.ft-pill-success { background: rgba(123,173,62,.18); color:#1F2937; }
-.ft-pill-danger  { background: rgba(201,32,32,.18); color:#1F2937; }
+
+.ft-pill-success {
+    background: rgba(123, 173, 62, .18);
+    color: #1F2937;
+}
+
+.ft-pill-danger {
+    background: rgba(201, 32, 32, .18);
+    color: #1F2937;
+}
+
+/* =========================
+   DARK MODE SUPPORT
+   ========================= */
+
+.dark .fi-layout,
+.dark .fi-main,
+.dark .fi-body {
+    background: #0F172A;
+    background-color: #0F172A;
+}
+
+.dark .fi-section,
+.dark .fi-panel,
+.dark .fi-widget,
+.dark .fi-card {
+    background-color: #1E293B;
+    border-color: rgba(148, 163, 184, 0.1);
+}
+
+.dark .fi-input,
+.dark .fi-select,
+.dark .fi-textarea {
+    background-color: #1E293B !important;
+    color: #F1F5F9 !important;
+}
+
+.dark .fi-input-wrp {
+    background-color: #1E293B !important;
+    border-color: #475569 !important;
+}
+
+.dark .fi-input:focus,
+.dark .fi-select:focus,
+.dark .fi-textarea:focus,
+.dark .fi-input-wrp:focus-within {
+    border-color: var(--ft-primary) !important;
+    background-color: #334155 !important;
+}
+
+.dark .fi-input::placeholder,
+.dark .fi-textarea::placeholder {
+    color: #94A3B8 !important;
+}
+
+.dark .fi-section-header-heading,
+.dark .fi-fo-field-label,
+.dark .fi-input-label,
+.dark .fi-form-field-label {
+    color: #F1F5F9 !important;
+}
+
+/* =========================
+   SIDEBAR - Dark Mode (same as light mode)
+   ========================= */
+
+.dark .fi-sidebar {
+    background: #151A2D;
+    box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
+}
+
+.dark .fi-sidebar-group-label {
+    color: rgba(255, 255, 255, 0.5) !important;
+}
+
+.dark .fi-sidebar-nav-item>a {
+    color: #fff;
+}
+
+.dark .fi-sidebar-nav-item>a:hover {
+    color: #151A2D;
+    background: #fff;
+}
+
+.dark .fi-sidebar-nav-item-active>a,
+.dark .fi-sidebar-nav-item.is-active>a {
+    color: #FFFFFF !important;
+    background: rgba(255, 255, 255, 0.15) !important;
+    border-left: 3px solid #10B981 !important;
+}
+
+/* Responsive media query for small screens */
+@media (max-width: 1024px) {
+    .fi-sidebar {
+        height: 56px;
+        margin: 13px;
+        overflow-y: hidden;
+        scrollbar-width: none;
+        width: calc(100% - 26px);
+        max-height: calc(100vh - 26px);
+    }
+
+    .fi-sidebar.menu-active {
+        overflow-y: auto;
+    }
+
+    .fi-sidebar .fi-sidebar-header {
+        display: none !important;
+        /* Hidden - logo is in top navbar */
+    }
+
+    .fi-sidebar-nav .fi-sidebar-group {
+        padding: 0 10px;
+    }
+
+    .fi-sidebar-nav-item>a {
+        gap: 10px;
+        padding: 10px;
+        font-size: 0.94rem;
+    }
+
+    .fi-main {
+        margin-left: 0 !important;
+    }
+}
+
+/* =========================
+   NOTIFICATION BELL - Header Icon
+   ========================= */
+.fi-notification-bell {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 9999px;
+    background: rgba(15, 23, 42, 0.05);
+    border: 2px solid rgba(15, 23, 42, 0.1);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    margin-right: 0.5rem;
+}
+
+.fi-notification-bell:hover {
+    background: rgba(15, 23, 42, 0.1);
+    border-color: rgba(15, 23, 42, 0.2);
+    transform: scale(1.05);
+}
+
+.fi-notification-bell svg {
+    width: 22px;
+    height: 22px;
+    color: #374151;
+}
+
+.dark .fi-notification-bell {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.1);
+}
+
+.dark .fi-notification-bell:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+.dark .fi-notification-bell svg {
+    color: #D1D5DB;
+}
+
+.fi-notification-badge {
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 20px;
+    height: 20px;
+    padding: 0 6px;
+    font-size: 11px;
+    font-weight: 700;
+    color: #FFFFFF;
+    background: #EF4444;
+    border-radius: 9999px;
+    box-shadow: 0 2px 4px rgba(239, 68, 68, 0.3);
+    animation: pulse-badge 2s infinite;
+}
+
+@keyframes pulse-badge {
+
+    0%,
+    100% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.1);
+    }
+}
+
+/* =========================
+   FILAMENT SECTION & TABLE OVERRIDES - Light Theme
+   ========================= */
+
+/* Main Section/Content wrapper */
+.fi-section,
+.fi-section-content,
+.fi-section-content-ctn {
+    background: var(--ft-bg-section) !important;
+    color: var(--ft-text-primary) !important;
+}
+
+/* Section header */
+.fi-section-header {
+    background: var(--ft-white) !important;
+    border-bottom: 1px solid var(--ft-border-section) !important;
+    border-radius: 1.5rem 1.5rem 0 0 !important;
+}
+
+/* Page content area */
+.fi-page-content,
+[class*="filament-page-content"] {
+    background: transparent !important;
+}
+
+/* Table containers */
+.fi-ta-ctn,
+.fi-ta-content,
+[class*="fi-table-content"] {
+    background: var(--ft-bg-section) !important;
+    border-radius: 1.5rem !important;
+}
+
+/* Force light backgrounds on any remaining dark elements */
+div[wire\\:snapshot],
+.fi-body>div,
+main .space-y-4>div {
+    background: transparent !important;
+}
+
+/* Specific fix for Notifications page table */
+.fi-page.notifications .fi-ta-ctn,
+.fi-page.notifications .fi-section {
+    background: var(--ft-bg-section) !important;
+}
+
+/* Dark Mode overrides for sections */
+.dark .fi-section,
+.dark .fi-section-content,
+.dark .fi-section-content-ctn {
+    background: #1E293B !important;
+    color: #F1F5F9 !important;
+}
+
+.dark .fi-section-header {
+    background: #0F172A !important;
+    border-bottom-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+.dark .fi-ta-ctn,
+.dark .fi-ta-content {
+    background: #1E293B !important;
+}
+
+.dark .fi-ta-table tbody tr {
+    background: rgba(255, 255, 255, 0.05) !important;
+}
+
+.dark .fi-ta-table tbody tr:hover {
+    background: rgba(255, 255, 255, 0.1) !important;
+}
+
+.dark .fi-ta-table tbody tr td,
+.dark .fi-ta-table thead th {
+    color: #F1F5F9 !important;
+    border-bottom-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+.dark .fi-ta-empty-state {
+    background: rgba(255, 255, 255, 0.05) !important;
+}
+
+.dark .fi-ta-empty-state-heading,
+.dark .fi-ta-empty-state-description,
+.dark .fi-ta-empty-state-icon {
+    color: #94A3B8 !important;
+}
+
+/* =========================
+   MOBILE RESPONSIVE STYLES
+   ========================= */
+
+/* Tablet - 768px and below */
+@media (max-width: 768px) {
+
+    /* Main content */
+    .fi-main {
+        padding: 1rem !important;
+        margin-left: 0 !important;
+    }
+
+    /* Page titles */
+    .fi-header-heading,
+    .ft-page-title {
+        font-size: 1.5rem !important;
+    }
+
+    /* Dashboard grid */
+    .ft-dashboard-grid {
+        grid-template-columns: 1fr !important;
+        gap: 1rem !important;
+    }
+
+    /* Summary cards */
+    .ft-summary-row {
+        grid-template-columns: 1fr !important;
+        gap: 1rem !important;
+    }
+
+    .ft-summary-card {
+        padding: 1rem 1.25rem !important;
+    }
+
+    /* Budget grid */
+    .ft-budget-grid {
+        grid-template-columns: 1fr !important;
+    }
+
+    /* Categories layout */
+    .ft-cat-layout {
+        padding: 1rem !important;
+        width: 100% !important;
+    }
+
+    .ft-cat-header {
+        flex-direction: row !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        gap: 0.5rem !important;
+        flex-wrap: wrap !important;
+    }
+
+    .ft-cat-table-head {
+        display: none !important;
+    }
+
+    .ft-cat-row {
+        display: flex !important;
+        flex-direction: row !important;
+        flex-wrap: wrap !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        gap: 0.5rem !important;
+        padding: 0.85rem 1rem !important;
+    }
+
+    .ft-cat-date {
+        flex: 1 1 auto !important;
+        white-space: nowrap !important;
+        font-size: 0.85rem !important;
+    }
+
+    .ft-cat-name {
+        flex: 0 0 auto !important;
+    }
+
+    .ft-cat-actions {
+        flex: 0 0 auto !important;
+        display: flex !important;
+        flex-direction: row !important;
+        gap: 0.35rem !important;
+    }
+
+    /* Transactions layout */
+    .ft-trans-layout {
+        padding: 1rem !important;
+    }
+
+    .ft-trans-header {
+        display: none !important;
+    }
+
+    .ft-trans-row {
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 0.5rem !important;
+        padding: 1rem !important;
+    }
+
+    .ft-trans-row .ft-col {
+        display: flex !important;
+        justify-content: space-between !important;
+        align-items: center !important;
+    }
+
+    /* Report summary */
+    .ft-report-summary-grid {
+        grid-template-columns: 1fr !important;
+    }
+
+    /* Cards */
+    .ft-card,
+    .fi-section,
+    .fi-widget {
+        padding: 1rem !important;
+    }
+
+    /* Buttons - smaller on mobile */
+    .fin-btn-outline-green {
+        padding: 0.4rem 0.8rem !important;
+        font-size: 0.75rem !important;
+    }
+
+    .fin-btn-dark,
+    .fin-btn-red {
+        padding: 0.35rem 0.65rem !important;
+        font-size: 0.7rem !important;
+        border-radius: 8px !important;
+    }
+
+    /* Filter pills */
+    .ft-filter-bar {
+        flex-wrap: wrap !important;
+        gap: 0.5rem !important;
+    }
+
+    .ft-filter-pill {
+        padding: 0.4rem 0.8rem !important;
+        font-size: 0.8rem !important;
+    }
+
+    /* Form inputs */
+    .fi-input,
+    .fi-select,
+    .fi-textarea {
+        font-size: 16px !important;
+    }
+
+    /* Modal */
+    .fi-modal-window {
+        width: 95% !important;
+        max-width: 95% !important;
+        margin: 1rem !important;
+    }
+
+    /* Topbar logo */
+    .fi-topbar-logo img {
+        max-width: 100px !important;
+    }
+
+    /* Sidebar hidden on tablet */
+    .fi-sidebar {
+        position: fixed !important;
+        left: -300px !important;
+        transition: left 0.3s ease !important;
+    }
+
+    .fi-sidebar.mobile-open {
+        left: 0 !important;
+    }
+}
+
+/* Mobile - 480px and below */
+@media (max-width: 480px) {
+
+    /* Main content */
+    .fi-main {
+        padding: 0.5rem !important;
+        margin-left: 0 !important;
+    }
+
+    /* Page titles */
+    .fi-header-heading,
+    .ft-page-title {
+        font-size: 1.25rem !important;
+    }
+
+    /* Summary cards */
+    .ft-summary-card {
+        padding: 0.75rem !important;
+    }
+
+    .ft-summary-label {
+        font-size: 0.7rem !important;
+    }
+
+    .ft-summary-value {
+        font-size: 1.1rem !important;
+    }
+
+    /* Cards */
+    .ft-card,
+    .fi-section,
+    .fi-widget {
+        padding: 0.75rem !important;
+        border-radius: 10px !important;
+    }
+
+    /* Categories */
+    .ft-cat-layout {
+        padding: 0.75rem !important;
+    }
+
+    .ft-cat-header {
+        margin-bottom: 1rem !important;
+    }
+
+    .ft-cat-row {
+        display: flex !important;
+        flex-direction: row !important;
+        flex-wrap: wrap !important;
+        align-items: center !important;
+        gap: 0.5rem !important;
+        padding: 0.75rem !important;
+        border-radius: 10px !important;
+    }
+
+    .ft-cat-date {
+        font-size: 0.8rem !important;
+        flex: 1 1 100% !important;
+        margin-bottom: 0.25rem !important;
+    }
+
+    .ft-cat-name {
+        flex: 1 1 auto !important;
+    }
+
+    .ft-cat-actions {
+        flex: 0 0 auto !important;
+        display: flex !important;
+        flex-direction: row !important;
+        gap: 0.25rem !important;
+    }
+
+    /* Transaction rows */
+    .ft-trans-row {
+        border-radius: 10px !important;
+        padding: 0.75rem !important;
+    }
+
+    /* Action buttons - compact */
+    .fin-btn-dark,
+    .fin-btn-red {
+        padding: 0.3rem 0.5rem !important;
+        font-size: 0.65rem !important;
+        border-radius: 6px !important;
+    }
+
+    .fin-btn-outline-green {
+        padding: 0.35rem 0.6rem !important;
+        font-size: 0.7rem !important;
+    }
+
+    /* Budget cards */
+    .ft-budget-card {
+        padding: 0.85rem !important;
+    }
+
+    .ft-budget-title {
+        font-size: 0.85rem !important;
+    }
+
+    .ft-budget-amount {
+        font-size: 0.95rem !important;
+    }
+
+    /* Notification bell */
+    .fi-notification-bell {
+        width: 32px !important;
+        height: 32px !important;
+    }
+
+    .fi-notification-bell svg {
+        width: 16px !important;
+        height: 16px !important;
+    }
+
+    /* Topbar */
+    .fi-topbar {
+        padding: 0.4rem 0.5rem !important;
+    }
+
+    /* Category pill */
+    .ft-pill-category {
+        padding: 0.2rem 0.5rem !important;
+        font-size: 0.7rem !important;
+    }
+
+    .fi-topbar-logo img {
+        max-width: 80px !important;
+    }
+
+    /* Hide sidebar on very small screens */
+    .fi-sidebar {
+        display: none !important;
+    }
+
+    .fi-main {
+        margin-left: 0 !important;
+    }
+}
+
+/* Landscape mobile */
+@media (max-width: 768px) and (orientation: landscape) {
+    .fi-sidebar {
+        max-height: 100vh !important;
+    }
+
+    .ft-dashboard-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+    }
+
+    .ft-summary-row {
+        grid-template-columns: repeat(2, 1fr) !important;
+    }
+}

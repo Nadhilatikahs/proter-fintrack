@@ -22,8 +22,9 @@ class Reminder extends Model
     ];
 
     protected $casts = [
-        'data'    => 'array',
+        'data' => 'array',
         'sent_at' => 'datetime',
+        'is_read' => 'boolean',
     ];
 
     public function user()

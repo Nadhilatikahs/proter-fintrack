@@ -13,10 +13,10 @@ class Profile extends Page implements Forms\Contracts\HasForms
 {
     use Forms\Concerns\InteractsWithForms;
 
-    protected static ?string $navigationIcon  = 'heroicon-o-user-circle';
+    protected static ?string $navigationIcon = 'heroicon-o-user-circle';
     protected static ?string $navigationLabel = 'Profile';
     protected static ?string $navigationGroup = 'Profile'; // biar masuk group Profile di sidebar
-    protected static ?int    $navigationSort  = 1;
+    protected static ?int $navigationSort = 1;
 
     protected static string $view = 'filament.pages.profile';
 
@@ -30,7 +30,7 @@ class Profile extends Page implements Forms\Contracts\HasForms
         $user = Auth::user();
 
         $this->form->fill([
-            'name'  => $user->name,
+            'name' => $user->name,
             'email' => $user->email,
         ]);
     }
@@ -98,12 +98,12 @@ class Profile extends Page implements Forms\Contracts\HasForms
         $data = $this->form->getState();
 
         // Update name & email
-        $user->name  = $data['name'] ?? $user->name;
+        $user->name = $data['name'] ?? $user->name;
         $user->email = $data['email'] ?? $user->email;
 
         // Kalau user isi password baru, cek current_password dulu
-        if (! empty($data['password'])) {
-            if (empty($data['current_password']) || ! Hash::check($data['current_password'], $user->password)) {
+        if (!empty($data['password'])) {
+            if (empty($data['current_password']) || !Hash::check($data['current_password'], $user->password)) {
                 Notification::make()
                     ->title('Current password salah')
                     ->danger()
