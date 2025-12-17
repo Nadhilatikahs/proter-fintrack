@@ -1,0 +1,136 @@
+/* =========================================================
+   FinTrack – Mobile Overrides (SAFE for Filament sidebar)
+   ========================================================= */
+
+/* 0) Safety: jangan bikin halaman “ngecil” karena overflow */
+@media (max-width: 1024px) {
+  html, body {
+    overflow-x: hidden !important;
+  }
+}
+
+/* 1) Main content: full width di mobile/tablet */
+@media (max-width: 1024px) {
+  .fi-main {
+    margin-left: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    padding: 1rem !important;
+  }
+}
+
+/* 2) Topbar spacing biar rapih di mobile */
+@media (max-width: 768px) {
+  .fi-topbar {
+    padding: 0.5rem 0.75rem !important;
+  }
+
+  .fi-header-heading,
+  .ft-page-title {
+    font-size: 1.4rem !important;
+    line-height: 1.2 !important;
+  }
+
+  /* iOS anti-zoom saat fokus input */
+  .fi-input,
+  .fi-select,
+  .fi-textarea {
+    font-size: 16px !important;
+  }
+
+  /* Card/panel padding lebih hemat */
+  .ft-card,
+  .fi-section,
+  .fi-widget,
+  .fi-card {
+    padding: 1rem !important;
+    border-radius: 14px !important;
+  }
+}
+
+/* 3) Mobile extra small */
+@media (max-width: 480px) {
+  .fi-main {
+    padding: 0.75rem !important;
+  }
+
+  .fi-header-heading,
+  .ft-page-title {
+    font-size: 1.2rem !important;
+  }
+
+  .ft-summary-row,
+  .ft-dashboard-grid,
+  .ft-budget-grid {
+    grid-template-columns: 1fr !important;
+    gap: 0.75rem !important;
+  }
+
+  .ft-summary-card {
+    padding: 0.85rem !important;
+  }
+}
+
+/* 4) Filament tables: biar nggak memaksa layout jadi “mini” */
+@media (max-width: 768px) {
+  .fi-ta-content,
+  .fi-ta-table {
+    display: block !important;
+    width: 100% !important;
+  }
+
+  /* wrapper yang biasa jadi sumber “ngecil” */
+  .fi-ta {
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .fi-ta-table {
+    min-width: 720px; /* biar kolom nggak hancur, tapi bisa scroll */
+  }
+}
+
+/* 5) Jangan ganggu sidebar di mobile:
+      - TIDAK ada display:none
+      - TIDAK ada left:-300px
+      Filament akan handle toggle hamburger sendiri */
+
+
+/* =========================================================
+   FinTrack – Mobile FIX (Filament v3 SAFE)
+   ========================================================= */
+
+@media (max-width: 1024px) {
+
+  /* 1️⃣ Jangan biarkan desktop margin hidup di mobile */
+  .fi-main {
+    margin-left: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    padding: 1rem !important;
+  }
+
+  /* 2️⃣ Sidebar: BIARKAN Filament yang atur open/close */
+  .fi-sidebar {
+    position: fixed !important;
+    inset-block: 0;
+    inset-inline-start: 0;
+    height: 100dvh;
+    z-index: 50;
+  }
+
+  /* ❗ PENTING:
+     JANGAN ADA transform / display / left / translate di sini */
+
+  /* 3️⃣ Pastikan layout tidak berubah jadi top-nav */
+  .fi-layout {
+    display: block !important;
+  }
+
+  /* 4️⃣ Overlay biarkan default Filament */
+  .fi-sidebar-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 40;
+  }
+}

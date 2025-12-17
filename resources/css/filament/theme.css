@@ -1,0 +1,10 @@
+/* =====================================================
+   FinTrack Filament Theme Entry
+   Desktop first, Mobile override last
+   ===================================================== */
+
+/* Desktop / base styles */
+@import "../filament-fintrack.css";
+
+/* Mobile overrides (SAFE, tidak rusak sidebar Filament) */
+@import "../filament-fintrack.mobile.css";
