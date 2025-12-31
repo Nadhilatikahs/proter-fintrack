@@ -3025,7 +3025,6 @@ body {
 
 /* =========================
    DARK MODE SUPPORT
-   ========================= */
 
 .dark .fi-layout,
 .dark .fi-main,
@@ -3076,7 +3075,6 @@ body {
 
 /* =========================
    SIDEBAR - Dark Mode (same as light mode)
-   ========================= */
 
 .dark .fi-sidebar {
     background: #151A2D;
@@ -3132,6 +3130,316 @@ body {
         padding: 10px;
         font-size: 0.94rem;
     }
+.ft-pill-success { background: rgba(123,173,62,.18); color:#1F2937; }
+.ft-pill-danger  { background: rgba(201,32,32,.18); color:#1F2937; }}
+
+/* =========================
+   MOBILE RESPONSIVE STYLES
+
+/* Tablet - 768px and below */
+@media (max-width: 768px) {
+
+    /* Main content */
+    .fi-main {
+        padding: 1rem !important;
+        margin-left: 0 !important;
+    }
+
+    /* Page titles */
+    .fi-header-heading,
+    .ft-page-title {
+        font-size: 1.5rem !important;
+    }
+
+    /* Dashboard grid */
+    .ft-dashboard-grid {
+        grid-template-columns: 1fr !important;
+        gap: 1rem !important;
+    }
+
+    /* Summary cards */
+    .ft-summary-row {
+        grid-template-columns: 1fr !important;
+        gap: 1rem !important;
+    }
+
+    .ft-summary-card {
+        padding: 1rem 1.25rem !important;
+    }
+
+    /* Budget grid */
+    .ft-budget-grid {
+        grid-template-columns: 1fr !important;
+    }
+
+    /* Categories layout */
+    .ft-cat-layout {
+        padding: 1rem !important;
+        width: 100% !important;
+    }
+
+    .ft-cat-header {
+        flex-direction: row !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        gap: 0.5rem !important;
+        flex-wrap: wrap !important;
+    }
+
+    .ft-cat-table-head {
+        display: none !important;
+    }
+
+    .ft-cat-row {
+        display: flex !important;
+        flex-direction: row !important;
+        flex-wrap: wrap !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        gap: 0.5rem !important;
+        padding: 0.85rem 1rem !important;
+    }
+
+    .ft-cat-date {
+        flex: 1 1 auto !important;
+        white-space: nowrap !important;
+        font-size: 0.85rem !important;
+    }
+
+    .ft-cat-name {
+        flex: 0 0 auto !important;
+    }
+
+    .ft-cat-actions {
+        flex: 0 0 auto !important;
+        display: flex !important;
+        flex-direction: row !important;
+        gap: 0.35rem !important;
+    }
+
+    /* Transactions layout */
+    .ft-trans-layout {
+        padding: 1rem !important;
+    }
+
+    .ft-trans-header {
+        display: none !important;
+    }
+
+    .ft-trans-row {
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 0.5rem !important;
+        padding: 1rem !important;
+    }
+
+    .ft-trans-row .ft-col {
+        display: flex !important;
+        justify-content: space-between !important;
+        align-items: center !important;
+    }
+
+    /* Report summary */
+    .ft-report-summary-grid {
+        grid-template-columns: 1fr !important;
+    }
+
+    /* Cards */
+    .ft-card,
+    .fi-section,
+    .fi-widget {
+        padding: 1rem !important;
+    }
+
+    /* Buttons - smaller on mobile */
+    .fin-btn-outline-green {
+        padding: 0.4rem 0.8rem !important;
+        font-size: 0.75rem !important;
+    }
+
+    .fin-btn-dark,
+    .fin-btn-red {
+        padding: 0.35rem 0.65rem !important;
+        font-size: 0.7rem !important;
+        border-radius: 8px !important;
+    }
+
+    /* Filter pills */
+    .ft-filter-bar {
+        flex-wrap: wrap !important;
+        gap: 0.5rem !important;
+    }
+
+    .ft-filter-pill {
+        padding: 0.4rem 0.8rem !important;
+        font-size: 0.8rem !important;
+    }
+
+    /* Form inputs */
+    .fi-input,
+    .fi-select,
+    .fi-textarea {
+        font-size: 16px !important;
+    }
+
+    /* Modal */
+    .fi-modal-window {
+        width: 95% !important;
+        max-width: 95% !important;
+        margin: 1rem !important;
+    }
+
+    /* Topbar logo */
+    .fi-topbar-logo img {
+        max-width: 100px !important;
+    }
+
+    /* Sidebar hidden on tablet */
+    .fi-sidebar {
+        position: fixed !important;
+        left: -300px !important;
+        transition: left 0.3s ease !important;
+    }
+
+    .fi-sidebar.mobile-open {
+        left: 0 !important;
+    }
+}
+
+/* Mobile - 480px and below */
+@media (max-width: 480px) {
+
+    /* Main content */
+    .fi-main {
+        padding: 0.5rem !important;
+        margin-left: 0 !important;
+    }
+
+    /* Page titles */
+    .fi-header-heading,
+    .ft-page-title {
+        font-size: 1.25rem !important;
+    }
+
+    /* Summary cards */
+    .ft-summary-card {
+        padding: 0.75rem !important;
+    }
+
+    .ft-summary-label {
+        font-size: 0.7rem !important;
+    }
+
+    .ft-summary-value {
+        font-size: 1.1rem !important;
+    }
+
+    /* Cards */
+    .ft-card,
+    .fi-section,
+    .fi-widget {
+        padding: 0.75rem !important;
+        border-radius: 10px !important;
+    }
+
+    /* Categories */
+    .ft-cat-layout {
+        padding: 0.75rem !important;
+    }
+
+    .ft-cat-header {
+        margin-bottom: 1rem !important;
+    }
+
+    .ft-cat-row {
+        display: flex !important;
+        flex-direction: row !important;
+        flex-wrap: wrap !important;
+        align-items: center !important;
+        gap: 0.5rem !important;
+        padding: 0.75rem !important;
+        border-radius: 10px !important;
+    }
+
+    .ft-cat-date {
+        font-size: 0.8rem !important;
+        flex: 1 1 100% !important;
+        margin-bottom: 0.25rem !important;
+    }
+
+    .ft-cat-name {
+        flex: 1 1 auto !important;
+    }
+
+    .ft-cat-actions {
+        flex: 0 0 auto !important;
+        display: flex !important;
+        flex-direction: row !important;
+        gap: 0.25rem !important;
+    }
+
+    /* Transaction rows */
+    .ft-trans-row {
+        border-radius: 10px !important;
+        padding: 0.75rem !important;
+    }
+
+    /* Action buttons - compact */
+    .fin-btn-dark,
+    .fin-btn-red {
+        padding: 0.3rem 0.5rem !important;
+        font-size: 0.65rem !important;
+        border-radius: 6px !important;
+    }
+
+    .fin-btn-outline-green {
+        padding: 0.35rem 0.6rem !important;
+        font-size: 0.7rem !important;
+    }
+
+    /* Budget cards */
+    .ft-budget-card {
+        padding: 0.85rem !important;
+    }
+
+    .ft-budget-title {
+        font-size: 0.85rem !important;
+    }
+
+    .ft-budget-amount {
+        font-size: 0.95rem !important;
+    }
+
+    /* Notification bell */
+    .fi-notification-bell {
+        width: 32px !important;
+        height: 32px !important;
+    }
+
+    .fi-notification-bell svg {
+        width: 16px !important;
+        height: 16px !important;
+    }
+
+    /* Topbar */
+    .fi-topbar {
+        padding: 0.4rem 0.5rem !important;
+    }
+
+    /* Category pill */
+    .ft-pill-category {
+        padding: 0.2rem 0.5rem !important;
+        font-size: 0.7rem !important;
+    }
+
+    .fi-topbar-logo img {
+        max-width: 80px !important;
+    }
+
+    /* Hide sidebar on very small screens */
+    .fi-sidebar {
+        display: none !important;
+    }
 
     .fi-main {
         margin-left: 0 !important;
@@ -3140,7 +3448,6 @@ body {
 
 /* =========================
    NOTIFICATION BELL - Header Icon
-   ========================= */
 .fi-notification-bell {
     position: relative;
     display: flex;
@@ -3215,7 +3522,6 @@ body {
 
 /* =========================
    FILAMENT SECTION & TABLE OVERRIDES - Light Theme
-   ========================= */
 
 /* Main Section/Content wrapper */
 .fi-section,
@@ -3301,3 +3607,17 @@ main .space-y-4>div {
     color: #94A3B8 !important;
 }
 
+/* Landscape mobile */
+@media (max-width: 768px) and (orientation: landscape) {
+    .fi-sidebar {
+        max-height: 100vh !important;
+    }
+
+    .ft-dashboard-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+    }
+
+    .ft-summary-row {
+        grid-template-columns: repeat(2, 1fr) !important;
+    }
+}

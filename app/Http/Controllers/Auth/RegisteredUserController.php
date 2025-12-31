@@ -49,10 +49,9 @@ class RegisteredUserController extends Controller
 
         event(new Registered($user));
 
-        // ⛔ TIDAK auto-login
-        // ⛔ TIDAK redirect ke dashboard
-
-        return redirect()->route('login')
+        // ⛔ Tidak auto-login
+        return redirect()
+            ->route('login')
             ->with('success', 'Akun berhasil dibuat. Silakan login.');
     }
 }
