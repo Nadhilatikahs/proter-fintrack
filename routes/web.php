@@ -10,7 +10,11 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/', function () {
-    return view('welcome');
+    if (Auth::check()) {
+        return redirect('/admin');
+    }
+
+    return redirect()->route('login');
 });
 
 /*
@@ -20,9 +24,9 @@ Route::get('/', function () {
 | Email verification belum diwajibkan untuk mencegah redirect issue
 */
 
-Route::get('/dashboard', function () {
-    return view('dashboard');
-})->middleware(['auth'])->name('dashboard');
+// Route::get('/dashboard', function () {
+//     return view('dashboard');
+// })->middleware(['auth'])->name('dashboard');
 
 /*
 |--------------------------------------------------------------------------
