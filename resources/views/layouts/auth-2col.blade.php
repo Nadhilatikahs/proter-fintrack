@@ -7,8 +7,10 @@
     {{-- Judul halaman --}}
     <title>@yield('title', 'FinTrack')</title>
 
-    {{-- WAJIB: Vite (CSS + JS, termasuk CSRF & session) --}}
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    
+    {{-- CSRF Token for Axios --}}
+    <meta name="csrf-token" content="{{ csrf_token() }}">
 
     {{-- Background animation (aman, hanya CSS) --}}
     <style>

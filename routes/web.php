@@ -13,7 +13,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     if (Auth::check()) {
-        return redirect('/dashboard');
+        return redirect('/admin');
     }
 
     return redirect()->route('login');
@@ -24,11 +24,13 @@ Route::get('/', function () {
 | Dashboard (AUTH ONLY, NO VERIFIED)
 |--------------------------------------------------------------------------
 | Email verification belum diwajibkan untuk mencegah redirect issue
+| Dashboard utama ada di /admin (Filament)
 */
 
-Route::get('/dashboard', [DashboardController::class, 'index'])
-    ->middleware(['auth'])
-    ->name('dashboard');
+Route::get('/dashboard', function () {
+    // Redirect to Filament admin dashboard
+    return redirect('/admin');
+})->middleware(['auth'])->name('dashboard');
 
 /*
 |--------------------------------------------------------------------------

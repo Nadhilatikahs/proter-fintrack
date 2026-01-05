@@ -40,7 +40,7 @@ class AdminPanelProvider extends PanelProvider
             ->brandLogo(asset('images/fintrack-logo.svg'))
             ->brandLogoHeight('2.5rem')
 
-            // 🎨 Theme via Vite (BENAR untuk Filament v3)
+            // 🎨 Theme
             ->viteTheme('resources/css/filament/theme.css')
 
             // 🌙 Enable Dark Mode

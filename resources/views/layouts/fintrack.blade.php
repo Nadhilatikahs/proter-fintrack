@@ -9,6 +9,9 @@
 
     {{-- CSS khusus Fintrack --}}
     <link rel="stylesheet" href="{{ asset('fintrack/fintrack-dashboard.css') }}">
+    
+    {{-- Tailwind CSS CDN (jika diperlukan) --}}
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="ft-body">
 <div class="ft-shell">
@@ -16,9 +19,9 @@
     {{-- SIDEBAR --}}
     <aside class="ft-sidebar">
         <div class="ft-sidebar-inner">
-            {{-- Logo, nanti kamu ganti ke SVG sendiri --}}
+            {{-- Logo --}}
             <div class="ft-logo">
-                <img src="{{ asset('public/images/fintrack-logo.svg') }}" alt="Fintrack">
+                <img src="{{ asset('images/fintrack-logo.svg') }}" alt="Fintrack">
             </div>
 
             <div class="ft-menu-label">MENU</div>
@@ -31,20 +34,20 @@
                     <span class="ft-nav-text">Dashboard</span>
                 </a>
 
-                <a href="{{ route('budget-goals.index') }}"
-                   class="ft-nav-item {{ request()->routeIs('budget-goals.*') ? 'is-active' : '' }}">
+                <a href="{{ url('/admin/budget-goals-overview') }}"
+                   class="ft-nav-item {{ request()->is('admin/budget-goals-overview') ? 'is-active' : '' }}">
                     <span class="ft-nav-icon ft-ico-bag"></span>
                     <span class="ft-nav-text">Budget &amp; Goals</span>
                 </a>
 
-                <a href="{{ route('transactions.index') }}"
-                   class="ft-nav-item {{ request()->routeIs('transactions.*') ? 'is-active' : '' }}">
+                <a href="{{ url('/admin/transactions-overview') }}"
+                   class="ft-nav-item {{ request()->is('admin/transactions-overview') ? 'is-active' : '' }}">
                     <span class="ft-nav-icon ft-ico-transaction"></span>
                     <span class="ft-nav-text">Transaction</span>
                 </a>
 
-                <a href="{{ route('reports.index') }}"
-                   class="ft-nav-item {{ request()->routeIs('reports.*') ? 'is-active' : '' }}">
+                <a href="{{ url('/admin/reports') }}"
+                   class="ft-nav-item {{ request()->is('admin/reports') ? 'is-active' : '' }}">
                     <span class="ft-nav-icon ft-ico-reports"></span>
                     <span class="ft-nav-text">Reports</span>
                 </a>
@@ -100,8 +103,14 @@
         </main>
     </div>
 </div>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+{{-- Chart.js CDN --}}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+{{-- Custom scripts jika ada --}}
+@if(file_exists(public_path('js/fintrack/reports.js')))
 <script src="{{ asset('js/fintrack/reports.js') }}"></script>
+@endif
 
 @stack('scripts')
 </body>

@@ -222,17 +222,17 @@ body:not(.dark) .fi-tabs-item-label {
    ========================= */
 
 .fi-layout {
-    background: transparent !important;
+    background: #eff6d2 !important;
     min-height: 100vh;
 }
 
 .fi-main {
-    background: transparent !important;
+    background: #eff6d2 !important;
     min-height: 100vh;
 }
 
 .fi-body {
-    background: linear-gradient(#F1FAFF, #CBE4FF) !important;
+    background: #eff6d2 !important;
     min-height: 100vh;
 }
 

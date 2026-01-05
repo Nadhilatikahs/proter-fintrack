@@ -8,21 +8,33 @@
 - ✅ Database created in cPanel
 - ✅ Subdomain configured: `fintrack.poyekterapan1.com`
 
+## 📁 Folder Structure
+
+- **Repository Path**: `/home/xxxsuzqm/Repositories/proter-fintrack`
+- **Application Path**: `/home/xxxsuzqm/fintrack.poyekterapan.com`
+- **Document Root**: `/home/xxxsuzqm/fintrack.poyekterapan.com/public`
+
 ---
 
 ## 📝 STEP 1: Prepare Local Environment
 
-### 1.1 Build Production Assets
+### 1.1 Build Production Assets (CRITICAL - Do this FIRST!)
 
 ```bash
 # Install dependencies (if not already done)
 npm install
 
-# Build production assets
+# Build production assets - THIS IS REQUIRED!
 npm run build
 
 # Verify build was successful
-# Check that public/build directory exists with assets
+ls -la public/build
+# You should see:
+# - manifest.json
+# - assets/ directory with CSS and JS files
+
+# IMPORTANT: The public/build directory will be deployed to server
+# This allows the app to work WITHOUT running npm on the server
 ```
 
 ### 1.2 Generate Application Key
@@ -47,19 +59,23 @@ MAIL_PASSWORD=<your_email_password>
 OPENAI_API_KEY=<your_openai_key_or_leave_empty>
 ```
 
-### 1.4 Commit All Changes to Git
+### 1.4 Commit All Changes to Git (Including Built Assets)
 
 ```bash
-# Stage all changes
+# Stage all changes (including public/build directory)
 git add .
 
 # Commit with message
-git commit -m "Prepare for production deployment"
+git commit -m "Prepare for production deployment - assets built"
 
 # Push to repository
 git push origin main
 # or
 git push origin master
+
+# ⚠️ IMPORTANT: Make sure public/build directory is committed!
+# Check with: git status
+# If public/build is ignored, temporarily remove it from .gitignore
 ```
 
 ---
@@ -107,13 +123,13 @@ git push origin master
 
 Fill in the form:
 
-- **Repository Name**: `fintrack` (or your preferred name)
+- **Repository Name**: `proter-fintrack` (or your preferred name)
 - **Repository URL**: 
-  - GitHub: `https://github.com/yourusername/fintrack.git`
-  - GitLab: `https://gitlab.com/yourusername/fintrack.git`
-  - Bitbucket: `https://bitbucket.org/yourusername/fintrack.git`
+  - GitHub: `https://github.com/yourusername/proter-fintrack.git`
+  - GitLab: `https://gitlab.com/yourusername/proter-fintrack.git`
+  - Bitbucket: `https://bitbucket.org/yourusername/proter-fintrack.git`
 - **Repository Branch**: `main` or `master` (match your default branch)
-- **Repository Path**: `/home/xxxsuzqm/fintrack` (or your preferred path)
+- **Repository Path**: `/home/xxxsuzqm/Repositories/proter-fintrack`
 - **Checkout Directory**: Leave empty (will use repository path)
 
 Click **Create**
@@ -126,16 +142,17 @@ If you prefer SSH access:
 # SSH into your cPanel server
 ssh xxxsuzqm@poyekterapan1.com
 
-# Navigate to public_html or your domain directory
-cd ~/public_html
-# OR for subdomain:
-cd ~/public_html/fintrack
+# Create Repositories directory if it doesn't exist
+mkdir -p ~/Repositories
+
+# Navigate to Repositories directory
+cd ~/Repositories
 
 # Clone your repository
-git clone https://github.com/yourusername/fintrack.git .
+git clone https://github.com/yourusername/proter-fintrack.git proter-fintrack
 
 # Or if using SSH key:
-git clone git@github.com:yourusername/fintrack.git .
+git clone git@github.com:yourusername/proter-fintrack.git proter-fintrack
 ```
 
 ---
@@ -148,7 +165,7 @@ git clone git@github.com:yourusername/fintrack.git .
 2. Create subdomain:
    - **Subdomain**: `fintrack`
    - **Domain**: `poyekterapan1.com`
-   - **Document Root**: `/home/xxxsuzqm/public_html/fintrack/public`
+   - **Document Root**: `/home/xxxsuzqm/fintrack.poyekterapan.com/public`
    - Click **Create**
 
 **⚠️ Important**: Document root must point to `/public` folder of Laravel!
@@ -170,33 +187,90 @@ git clone git@github.com:yourusername/fintrack.git .
 # SSH into server
 ssh xxxsuzqm@poyekterapan1.com
 
-# Navigate to application directory
-cd ~/public_html/fintrack
+# Navigate to repository directory
+cd ~/Repositories/proter-fintrack
 
 # Pull latest changes
 git pull origin main
 
-# Or if first time setup:
-git clone https://github.com/yourusername/fintrack.git .
+# Copy files to application directory
+# First time setup - copy all files
+rsync -av --exclude='.git' --exclude='node_modules' --exclude='vendor' ~/Repositories/proter-fintrack/ ~/fintrack.poyekterapan.com/
+
+# Or use symlink method (see Step 5.4)
 ```
 
-### 5.3 Install Dependencies
+### 5.3 Copy Files to Application Directory
+
+**Option A: Copy Files (Recommended for first deployment)**
+
+```bash
+# SSH into server
+ssh xxxsuzqm@poyekterapan1.com
+
+# Navigate to repository
+cd ~/Repositories/proter-fintrack
+
+# Pull latest changes
+git pull origin main
+
+# Copy files to application directory
+# IMPORTANT: Include public/build directory (built assets)
+rsync -av --exclude='.git' \
+          --exclude='node_modules' \
+          --exclude='vendor' \
+          --exclude='.env' \
+          --exclude='storage/logs/*' \
+          --include='public/build' \
+          --include='public/build/**' \
+          ~/Repositories/proter-fintrack/ \
+          ~/fintrack.poyekterapan.com/
+
+# Navigate to application directory
+cd ~/fintrack.poyekterapan.com
+
+# Verify build directory exists
+ls -la public/build
+# Should show manifest.json and assets/ directory
+```
+
+**Option B: Use Symlink (For easier updates)**
+
+```bash
+# SSH into server
+ssh xxxsuzqm@poyekterapan1.com
+
+# Create application directory if it doesn't exist
+mkdir -p ~/fintrack.poyekterapan.com
+
+# Navigate to repository
+cd ~/Repositories/proter-fintrack
+
+# Pull latest changes
+git pull origin main
+
+# Copy files first time (symlink doesn't work well with Laravel)
+rsync -av --exclude='.git' ~/Repositories/proter-fintrack/ ~/fintrack.poyekterapan.com/
+
+# Navigate to application directory
+cd ~/fintrack.poyekterapan.com
+```
+
+### 5.4 Install Dependencies
 
 ```bash
 # SSH into server
 ssh xxxsuzqm@poyekterapan1.com
 
 # Navigate to application directory
-cd ~/public_html/fintrack
+cd ~/fintrack.poyekterapan.com
 
 # Install PHP dependencies
 composer install --no-dev --optimize-autoloader
 
-# Install Node dependencies (if needed)
-npm install --production
-
-# Build assets (if not already built locally)
-npm run build
+# ⚠️ NOTE: You DON'T need to run npm install or npm run build on server
+# Assets are already built locally and included in public/build directory
+# This is why we build assets BEFORE pushing to Git (Step 1.1)
 ```
 
 ---
@@ -210,7 +284,7 @@ npm run build
 ssh xxxsuzqm@poyekterapan1.com
 
 # Navigate to application directory
-cd ~/public_html/fintrack
+cd ~/fintrack.poyekterapan.com
 
 # Copy prod.env to .env
 cp prod.env .env
@@ -222,7 +296,7 @@ cp prod.env .env
 
 **Option A: Via cPanel File Manager**
 1. Go to **File Manager**
-2. Navigate to `public_html/fintrack`
+2. Navigate to `fintrack.poyekterapan.com` (in home directory)
 3. Find `.env` file (or create it)
 4. Right-click → **Edit**
 5. Paste content from `prod.env` and update:
@@ -263,7 +337,7 @@ grep -E "^APP_KEY=|^DB_|^APP_URL=" .env
 ssh xxxsuzqm@poyekterapan1.com
 
 # Navigate to application directory
-cd ~/public_html/fintrack
+cd ~/fintrack.poyekterapan.com
 
 # Set storage permissions
 chmod -R 775 storage
@@ -289,7 +363,7 @@ find bootstrap/cache -type d -exec chmod 775 {} \;
 ssh xxxsuzqm@poyekterapan1.com
 
 # Navigate to application directory
-cd ~/public_html/fintrack
+cd ~/fintrack.poyekterapan.com
 
 # Clear and cache config
 php artisan config:clear
@@ -348,7 +422,7 @@ The file should already exist, but verify it has:
 
 1. Go to **Subdomains**
 2. Edit `fintrack` subdomain
-3. Ensure **Document Root** is: `/home/xxxsuzqm/public_html/fintrack/public`
+3. Ensure **Document Root** is: `/home/xxxsuzqm/fintrack.poyekterapan.com/public`
 4. Save
 
 ---
@@ -414,9 +488,29 @@ Add this content:
 
 ```bash
 #!/bin/bash
-cd ~/public_html/fintrack
+# Update repository
+cd ~/Repositories/proter-fintrack
 git pull origin main
+
+# Copy files to application directory
+# Include public/build (built assets) - no npm needed on server!
+rsync -av --exclude='.git' \
+          --exclude='node_modules' \
+          --exclude='vendor' \
+          --exclude='.env' \
+          --exclude='storage/logs/*' \
+          --include='public/build' \
+          --include='public/build/**' \
+          ~/Repositories/proter-fintrack/ \
+          ~/fintrack.poyekterapan.com/
+
+# Navigate to application directory
+cd ~/fintrack.poyekterapan.com
+
+# Install dependencies
 composer install --no-dev --optimize-autoloader
+
+# Run migrations and optimize
 php artisan migrate --force
 php artisan config:cache
 php artisan route:cache
@@ -533,7 +627,18 @@ Your FinTrack application should now be live at:
 For future updates:
 1. Make changes locally
 2. Commit and push to Git
-3. SSH into server and run: `git pull && composer install && php artisan migrate --force && php artisan optimize`
+3. SSH into server and run:
+   ```bash
+   cd ~/Repositories/proter-fintrack
+   git pull origin main
+   rsync -av --exclude='.git' --exclude='node_modules' --exclude='vendor' --exclude='.env' ~/Repositories/proter-fintrack/ ~/fintrack.poyekterapan.com/
+   cd ~/fintrack.poyekterapan.com
+   composer install --no-dev --optimize-autoloader
+   php artisan migrate --force
+   php artisan optimize
+   ```
+   
+   Or simply run: `~/deploy-fintrack.sh`
 
 ---
 
