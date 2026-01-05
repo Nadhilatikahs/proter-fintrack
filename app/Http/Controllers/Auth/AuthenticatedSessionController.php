@@ -28,8 +28,8 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerate();
 
-        // Redirect to admin panel after login
-        return redirect()->intended('/admin');
+        // Redirect to dashboard after login
+        return redirect()->intended('/dashboard');
     }
 
     /**

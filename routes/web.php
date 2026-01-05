@@ -1,6 +1,8 @@
 <?php
 
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ProfileController;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -11,7 +13,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     if (Auth::check()) {
-        return redirect('/admin');
+        return redirect('/dashboard');
     }
 
     return redirect()->route('login');
@@ -24,9 +26,9 @@ Route::get('/', function () {
 | Email verification belum diwajibkan untuk mencegah redirect issue
 */
 
-// Route::get('/dashboard', function () {
-//     return view('dashboard');
-// })->middleware(['auth'])->name('dashboard');
+Route::get('/dashboard', [DashboardController::class, 'index'])
+    ->middleware(['auth'])
+    ->name('dashboard');
 
 /*
 |--------------------------------------------------------------------------
