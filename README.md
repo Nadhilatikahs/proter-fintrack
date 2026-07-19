@@ -1,59 +1,175 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# 🚀 FinTrack PWA
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+**FinTrack PWA** is a smart, mobile-first Progressive Web App (PWA) and personal finance manager built on **Laravel 12** and **Filament PHP v3**. It allows users to track their daily transactions, configure category-based budgets, visualize savings targets, export PDF summaries, and receive personalized, Gen-Z themed AI reminders in Indonesian to stay on top of their financial health.
 
-## About Laravel
+---
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## 🌟 Key Features
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+### 📱 Progressive Web App (PWA)
+- **Installable**: Adds directly to the home screen on iOS, Android, and desktop browsers with no store downloads required.
+- **Offline Mode**: Native Service Worker caching allows browsing dashboard details and accessing core components even without an active internet connection.
+- **Responsive Layout**: Designed specifically for a premium native app feel on mobile screens.
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+### 🤖 AI-Powered Reminders & Warnings
+- **Gen-Z Tone**: Leverages the **OpenAI Chat API** (`gpt-4o-mini`) to generate witty, engaging, and friendly reminders in Indonesian (e.g., reminding users about budget goals so they don't have to enter "survival mode" or eat "mie prestige").
+- **Dynamic Threshold Alerts**: Auto-calculates budget and goal milestones:
+  - **Budget Warnings**: Triggers alerts when expense thresholds cross **50%**, **80%**, and **90%** of limits.
+  - **Goal Milestones**: Celebrates savings milestones at **50%**, **80%**, **90%**, and **100% (Completed)** targets.
+- **Daily Check-ins**: Sends scheduled reminders to log transactions in the morning (09:00 WIB) and evening (19:00 WIB).
+- **Anti-Gagal Fallback**: Falls back automatically to rich static templates if the OpenAI API is offline or slow, ensuring notifications are never missed.
 
-## Learning Laravel
+### 📊 Comprehensive Finance Management
+- **Interactive Dashboard**: Features visual statistics and monthly breakdown widgets of income vs. expenses.
+- **Budgets & Goals**: Configurable budget limits and savings goals mapped to specific categories.
+- **Automatic Savings Observer**: An Eloquent observer (`TransactionObserver`) dynamically increments/decrements savings goal balances in real-time when transactions are created, updated, or deleted.
+- **PDF Report Engine**: Download high-quality, professional summaries of Daily Transactions, Cashflows, and Budget Goals via `dompdf`.
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+---
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+## 🛠️ Tech Stack & Architecture
 
-## Laravel Sponsors
+- **Backend**: [Laravel 12.x](https://laravel.com) (PHP 8.2+)
+- **Admin Interface**: [Filament v3](https://filamentphp.com) (Fast, modern dashboard panel built on Livewire)
+- **Styling & Assets**: [TailwindCSS](https://tailwindcss.com), [Vite](https://vite.dev)
+- **PDF Engine**: [Laravel DomPDF](https://github.com/barryvdh/laravel-dompdf)
+- **AI Service**: [OpenAI Chat Completion API](https://openai.com)
+- **Scheduled Commands**: Laravel Console Command scheduler
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+---
 
-### Premium Partners
+## 📂 Project Architecture Outline
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+The core functionality of the FinTrack PWA is driven by the following files:
 
-## Contributing
+- **AI Services**:
+  - `app/Services/NotificationAiService.php` - Prompt template builders, OpenAI HTTP connection handler, and fallback generator.
+  - `app/Services/FintrackReminderNotificationService.php` - Formats contexts for users, transactions, and goals.
+- **Artisan Console Commands**:
+  - `app/Console/Commands/FintrackDailyTransactionRemindersCommand.php` - Queries active users, checks daily activity, and delivers morning/evening reminders.
+  - `app/Console/Commands/FintrackBudgetGoalRemindersCommand.php` - Evaluates budgets and savings targets, compares progress thresholds, and logs progress.
+- **Database Logic**:
+  - `app/Models/BudgetGoal.php` - Savings goal and monthly spending limits.
+  - `app/Models/Transaction.php` - Income and expense logs.
+  - `app/Observers/TransactionObserver.php` - Synchronizes transactions and savings goals automatically.
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+---
 
-## Code of Conduct
+## 💾 Database Schema Overview
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+```mermaid
+erDiagram
+    users ||--o{ transactions : logs
+    users ||--o{ budget_goals : configures
+    users ||--o{ reminder_settings : preferences
+    users ||--o{ reminders : receives
+    categories ||--o{ transactions : classifies
+    categories ||--o{ budget_goals : links
+```
 
-## Security Vulnerabilities
+1. **`users`**: Login credentials and general details.
+2. **`categories`**: Mapped classifications for income and expenses.
+3. **`transactions`**: Holds financial items specifying amount, date, description, and type (`income`/`expense`).
+4. **`budget_goals`**: Tracks savings targets or monthly expenditure thresholds (`type: budget` or `type: goal`), keeping track of `target_amount` and `current_amount`.
+5. **`reminder_settings`**: User-defined preferences regarding automated reminders.
+6. **`reminders`**: Database log of delivered notifications visible in the Filament app.
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+---
 
-## License
+## 🚀 Getting Started
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+### Prerequisites
+Make sure you have installed:
+- PHP 8.2 or newer
+- Composer
+- Node.js & NPM
+- SQLite (default) or MySQL
+
+### 1. Clone & Install Dependencies
+```bash
+git clone https://github.com/Nadhilatikahs/proter-fintrack.git
+cd proter-fintrack
+composer install
+npm install
+```
+
+### 2. Configure Environment
+Copy `.env.example` to `.env` and set up your application key:
+```bash
+cp .env.example .env
+php artisan key:generate
+```
+
+In `.env`, configure your database connection and provide your OpenAI API key for AI-generated reminders:
+```env
+# Database configuration (SQLite by default)
+DB_CONNECTION=sqlite
+
+# OpenAI Configuration
+OPENAI_API_KEY=your_openai_api_key_here
+AI_MODEL=gpt-4o-mini
+```
+
+> [!NOTE]
+> During local development, the AI notification client will automatically disable SSL verification to prevent common Windows curl certificate issues.
+
+### 3. Run Database Migrations
+Create your database and run migrations:
+```bash
+# For SQLite:
+touch database/database.sqlite
+
+# Run migrations
+php artisan migrate --seed
+```
+
+### 4. Build Assets
+Compile the TailwindCSS stylesheets and frontend bundle:
+```bash
+npm run build
+```
+
+### 5. Start Server
+Run the local Laravel development server:
+```bash
+php artisan serve
+```
+Visit the application at: `http://localhost:8000`. Access the Filament dashboard panel at `http://localhost:8000/admin`.
+
+---
+
+## ⏰ Commands & Scheduler
+
+FinTrack provides CLI commands to execute automated checks. These can be wired up in your OS Cron system or Laravel Scheduler:
+
+### Daily Transaction Reminders
+Triggers a notification to check if users have filled in their daily spendings.
+- **Morning Reminder** (09:00 WIB):
+  ```bash
+  php artisan fintrack:daily-transaction-reminders pagi
+  ```
+- **Evening Reminder** (19:00 WIB):
+  ```bash
+  php artisan fintrack:daily-transaction-reminders malam
+  ```
+
+### Budget & Goal Alerts
+Compares spent amounts against budgets and savings goals, flagging users on 50%, 80%, 90%, and 100% checkpoints:
+```bash
+php artisan fintrack:budget-goal-reminders
+```
+
+---
+
+## 🔍 Testing & Verification
+
+Run the test suite to verify the application functionality:
+```bash
+php artisan test
+```
+
+---
+
+## 🛡️ License
+
+The FinTrack application is open-sourced software licensed under the [MIT license](LICENSE).
