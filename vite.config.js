@@ -7,6 +7,7 @@ export default defineConfig({
             input: [
                 'resources/css/app.css',
                 'resources/css/filament-fintrack.css',
+                'resources/css/filament/theme.css', // Filament theme
                 'resources/js/app.js',
             ],
             refresh: true,

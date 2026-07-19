@@ -2,110 +2,106 @@
 @section('title','Register | FinTrack')
 
 @section('card')
-<h2 class="text-2xl font-bold text-[#1F2937] mb-6">
-    Create Account
-</h2>
+    <h2 class="text-2xl font-bold text-[#1F2937]">
+        Create Account
+    </h2>
+    <p class="mt-1 text-sm text-[#1F2937]/70">
+        Daftar dulu, nanti lanjut login.
+    </p>
 
-{{-- FLASH SUCCESS (DARI REGISTER) --}}
-@if (session('success'))
-    <div class="mb-4 rounded-lg bg-green-50 border border-green-200 p-4">
-        <p class="text-sm text-green-700 font-medium">
-            {{ session('success') }}
-        </p>
-    </div>
-@endif
+    {{-- GLOBAL ERRORS --}}
+    @if ($errors->any())
+        <div class="mt-5 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+            <div class="font-semibold mb-2">Ada yang perlu dibenerin:</div>
+            <ul class="list-disc pl-5 space-y-1">
+                @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
 
-{{-- ERROR LOGIN --}}
-@if ($errors->any())
-    <div class="mb-4 rounded-lg bg-red-50 border border-red-200 p-4">
-        <p class="text-sm text-red-700">
-            Email atau password salah.
-        </p>
-    </div>
-@endif
+    <form method="POST" action="{{ route('register') }}" class="mt-6 space-y-5">
+        @csrf
 
-<form method="POST" action="{{ route('register') }}" class="space-y-4">
-    @csrf
+        {{-- Full Name --}}
+        <div>
+            <label class="text-sm font-medium text-[#1F2937]">Full Name</label>
+            <input
+                name="name"
+                value="{{ old('name') }}"
+                required
+                autocomplete="name"
+                class="mt-2 w-full rounded-xl border border-gray-200 bg-white px-4 py-3
+                       focus:outline-none focus:ring-2 focus:ring-[#7BAD3E]/40"
+            >
+            @error('name')
+                <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+            @enderror
+        </div>
 
-    {{-- FULL NAME --}}
-    <div>
-        <label class="text-sm font-medium text-gray-700">Full Name</label>
-        <input
-            name="name"
-            value="{{ old('name') }}"
-            required
-            class="mt-1 w-full rounded-lg border px-4 py-3
-                @error('name') border-red-500 @else border-gray-300 @enderror
-                focus:ring-[#7BAD3E] focus:border-[#7BAD3E]"
+        {{-- Email --}}
+        <div>
+            <label class="text-sm font-medium text-[#1F2937]">Email</label>
+            <input
+                name="email"
+                type="email"
+                value="{{ old('email') }}"
+                required
+                autocomplete="username"
+                class="mt-2 w-full rounded-xl border border-gray-200 bg-white px-4 py-3
+                       focus:outline-none focus:ring-2 focus:ring-[#7BAD3E]/40"
+            >
+            @error('email')
+                <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+            @enderror
+        </div>
+
+        {{-- Password --}}
+        <div>
+            <label class="text-sm font-medium text-[#1F2937]">Password</label>
+            <input
+                name="password"
+                type="password"
+                required
+                autocomplete="new-password"
+                class="mt-2 w-full rounded-xl border border-gray-200 bg-white px-4 py-3
+                       focus:outline-none focus:ring-2 focus:ring-[#7BAD3E]/40"
+            >
+            <p class="mt-2 text-xs text-[#1F2937]/60">
+                Minimal 5 karakter, wajib huruf besar, angka, dan simbol.
+            </p>
+            @error('password')
+                <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+            @enderror
+        </div>
+
+        {{-- Confirm Password --}}
+        <div>
+            <label class="text-sm font-medium text-[#1F2937]">Confirm Password</label>
+            <input
+                name="password_confirmation"
+                type="password"
+                required
+                autocomplete="new-password"
+                class="mt-2 w-full rounded-xl border border-gray-200 bg-white px-4 py-3
+                       focus:outline-none focus:ring-2 focus:ring-[#7BAD3E]/40"
+            >
+        </div>
+
+        <button
+            type="submit"
+            class="mt-2 w-full rounded-xl bg-[#7BAD3E] py-3 font-semibold text-white
+                   hover:bg-[#6a9c34] transition"
         >
+            Sign Up
+        </button>
+    </form>
 
-        @error('name')
-            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-        @enderror
-    </div>
-
-    {{-- EMAIL --}}
-    <div>
-        <label class="text-sm font-medium text-gray-700">Email</label>
-        <input
-            name="email"
-            type="email"
-            value="{{ old('email') }}"
-            required
-            class="mt-1 w-full rounded-lg border px-4 py-3
-                @error('email') border-red-500 @else border-gray-300 @enderror
-                focus:ring-[#7BAD3E] focus:border-[#7BAD3E]"
-        >
-
-        @error('email')
-            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-        @enderror
-    </div>
-
-    {{-- PASSWORD --}}
-    <div>
-        <label class="text-sm font-medium text-gray-700">Password</label>
-        <input
-            name="password"
-            type="password"
-            required
-            class="mt-1 w-full rounded-lg border px-4 py-3
-                @error('password') border-red-500 @else border-gray-300 @enderror
-                focus:ring-[#7BAD3E] focus:border-[#7BAD3E]"
-        >
-
-        {{-- Password rule hint --}}
-        <p class="mt-1 text-xs text-gray-500">
-            Minimal 5 karakter, wajib huruf besar, angka, dan simbol.
-        </p>
-
-        @error('password')
-            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-        @enderror
-    </div>
-
-    {{-- CONFIRM PASSWORD --}}
-    <div>
-        <label class="text-sm font-medium text-gray-700">Confirm Password</label>
-        <input
-            name="password_confirmation"
-            type="password"
-            required
-            class="mt-1 w-full rounded-lg border px-4 py-3 border-gray-300
-                focus:ring-[#7BAD3E] focus:border-[#7BAD3E]"
-        >
-    </div>
-
-    {{-- SUBMIT --}}
-    <button
-        type="submit"
-        class="w-full bg-[#7BAD3E] hover:bg-[#6a9a36] transition
-               text-white py-3 rounded-lg font-semibold"
-    >
-        Sign Up
-    </button>
-</form>
-
-<p class="mt-6 text-center text-sm text-gray-600">
-    Sudah punya akun?
-    <a href="{{ route('login') }}" class="text-[#7BAD3E] font-semibold hover:underline">
+    <p class="mt-6 text-center text-sm text-[#1F2937]/70">
+        Sudah punya akun?
+        <a href="{{ route('login') }}" class="text-[#7BAD3E] font-semibold hover:underline">
+            Log In
+        </a>
+    </p>
+@endsection

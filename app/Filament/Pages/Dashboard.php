@@ -31,8 +31,8 @@ class Dashboard extends BaseDashboard
         $userId = $user?->id;
 
         $today = Carbon::today();
-        $from  = $this->fromDate ?: $today->copy()->startOfMonth()->toDateString();
-        $to    = $this->toDate   ?: $today->copy()->endOfMonth()->toDateString();
+        $from  = $this->fromDate ? Carbon::parse($this->fromDate)->startOfDay() : $today->copy()->startOfMonth();
+        $to    = $this->toDate   ? Carbon::parse($this->toDate)->endOfDay() : $today->copy()->endOfMonth();
 
         if (! $userId) {
             return [
@@ -41,21 +41,21 @@ class Dashboard extends BaseDashboard
                 'categoryChart'    => ['labels' => [], 'data' => []],
                 'dailyChart'       => ['labels' => [], 'income' => [], 'expense' => []],
                 'lastTransactions' => collect(),
-                'fromDate'         => $from,
-                'toDate'           => $to,
+                'fromDate'         => $from->toDateString(),
+                'toDate'           => $to->toDateString(),
             ];
         }
 
-        // summary
-        $income = Transaction::where('user_id', $userId)
+        // summary - fix: ensure we're getting all transactions for current month
+        $income = (float) Transaction::where('user_id', $userId)
             ->where('type', 'income')
-            ->whereBetween('date', [$from, $to])
-            ->sum('amount');
+            ->whereBetween('date', [$from->toDateString(), $to->toDateString()])
+            ->sum('amount') ?: 0;
 
-        $expense = Transaction::where('user_id', $userId)
+        $expense = (float) Transaction::where('user_id', $userId)
             ->where('type', 'expense')
-            ->whereBetween('date', [$from, $to])
-            ->sum('amount');
+            ->whereBetween('date', [$from->toDateString(), $to->toDateString()])
+            ->sum('amount') ?: 0;
 
         // pie by category (expense)
         $categoryRows = Transaction::query()
@@ -63,7 +63,7 @@ class Dashboard extends BaseDashboard
             ->leftJoin('categories', 'transactions.category_id', '=', 'categories.id')
             ->where('transactions.user_id', $userId)
             ->where('transactions.type', 'expense')
-            ->whereBetween('transactions.date', [$from, $to])
+            ->whereBetween('transactions.date', [$from->toDateString(), $to->toDateString()])
             ->groupBy('label')
             ->orderByDesc('total')
             ->limit(6)
@@ -75,16 +75,64 @@ class Dashboard extends BaseDashboard
                 SUM(CASE WHEN type = "income"  THEN amount ELSE 0 END) AS income,
                 SUM(CASE WHEN type = "expense" THEN amount ELSE 0 END) AS expense')
             ->where('user_id', $userId)
-            ->whereBetween('date', [$from, $to])
+            ->whereBetween('date', [$from->toDateString(), $to->toDateString()])
             ->groupBy('date')
             ->orderBy('date')
             ->get();
+
+        // Weekly data by category (for line chart: Saving, Lifestyle, Food)
+        $weeklyCategoryData = Transaction::query()
+            ->selectRaw('WEEK(date, 1) as week_number,
+                categories.name as category_name,
+                SUM(transactions.amount) as total')
+            ->leftJoin('categories', 'transactions.category_id', '=', 'categories.id')
+            ->where('transactions.user_id', $userId)
+            ->where('transactions.type', 'expense')
+            ->whereBetween('transactions.date', [$from->toDateString(), $to->toDateString()])
+            ->groupBy('week_number', 'category_name')
+            ->orderBy('week_number')
+            ->get();
+
+        // Group by week and category
+        $weeks = [];
+        $savingData = [];
+        $lifestyleData = [];
+        $foodData = [];
+        
+        $weekNumbers = $weeklyCategoryData->pluck('week_number')->unique()->sort()->values();
+        foreach ($weekNumbers as $weekNum) {
+            $weeks[] = "week " . ($weekNum - $weekNumbers->first() + 1);
+            $weekData = $weeklyCategoryData->where('week_number', $weekNum);
+            
+            $savingData[] = $weekData->filter(fn($d) => 
+                stripos($d->category_name ?? '', 'saving') !== false || 
+                stripos($d->category_name ?? '', 'save') !== false
+            )->sum('total');
+            
+            $lifestyleData[] = $weekData->filter(fn($d) => 
+                stripos($d->category_name ?? '', 'lifestyle') !== false || 
+                stripos($d->category_name ?? '', 'life') !== false
+            )->sum('total');
+            
+            $foodData[] = $weekData->filter(fn($d) => 
+                stripos($d->category_name ?? '', 'food') !== false || 
+                stripos($d->category_name ?? '', 'makan') !== false
+            )->sum('total');
+        }
+        
+        // If no weeks, create default 4 weeks
+        if (empty($weeks)) {
+            $weeks = ['week 1', 'week 2', 'week 3', 'week 4'];
+            $savingData = [0, 0, 0, 0];
+            $lifestyleData = [0, 0, 0, 0];
+            $foodData = [0, 0, 0, 0];
+        }
 
         $lastTransactions = Transaction::with('category')
             ->where('user_id', $userId)
             ->orderByDesc('date')
             ->orderByDesc('created_at')
-            ->limit(5)
+            ->limit(10)
             ->get();
 
         return [
@@ -107,9 +155,16 @@ class Dashboard extends BaseDashboard
                 'expense' => $dailyRows->pluck('expense')->values(),
             ],
 
+            'weeklyChart' => [
+                'weeks' => $weeks,
+                'saving' => $savingData,
+                'lifestyle' => $lifestyleData,
+                'food' => $foodData,
+            ],
+
             'lastTransactions' => $lastTransactions,
-            'fromDate'         => $from,
-            'toDate'           => $to,
+            'fromDate'         => $from->toDateString(),
+            'toDate'           => $to->toDateString(),
         ];
     }
 }
